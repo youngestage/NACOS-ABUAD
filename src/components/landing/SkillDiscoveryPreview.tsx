@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { Sparkles, ArrowRight, ShieldCheck, Zap, Award, CheckCircle2 } from "lucide-react";
+import { Sparkles, ArrowRight, Zap, Award, CheckCircle2 } from "lucide-react";
+import Lightfall from "@/components/Lightfall";
 
 interface SkillDiscoveryPreviewProps {
   onOpenQuiz: () => void;
@@ -10,56 +11,84 @@ interface SkillDiscoveryPreviewProps {
 export default function SkillDiscoveryPreview({ onOpenQuiz }: SkillDiscoveryPreviewProps) {
   return (
     <section id="skills" className="py-20 sm:py-28 bg-paper border-t border-line relative overflow-hidden">
-      {/* Ambient background glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-gradient-to-b from-forest/6 via-[#3DDC84]/5 to-transparent blur-3xl -z-10 pointer-events-none" />
-
-      <div className="max-w-5xl mx-auto px-6 sm:px-8 text-center space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Eyebrow Tag */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-forest/10 border border-forest/15 text-xs font-mono font-semibold uppercase tracking-wider text-forest">
-          <Sparkles className="w-3.5 h-3.5 text-signal" />
-          <span>AI SKILL DIAGNOSTIC</span>
-        </div>
+        {/* Main Heroic Card with Lightfall WebGL Shimmer Background */}
+        <div className="relative w-full rounded-3xl sm:rounded-[36px] bg-[#0A160F] text-paper border border-white/15 p-8 sm:p-14 lg:p-16 shadow-2xl overflow-hidden text-center flex flex-col items-center justify-center min-h-[460px] sm:min-h-[500px]">
+          
+          {/* Lightfall Canvas in Brand Green Colors */}
+          <div className="absolute inset-0 w-full h-full pointer-events-none select-none -z-0 opacity-85">
+            <Lightfall
+              colors={["#3DDC84", "#008751", "#235F41", "#C89B3C"]}
+              backgroundColor="#0A160F"
+              speed={0.6}
+              streakCount={4}
+              streakWidth={1.2}
+              streakLength={1.2}
+              glow={1.2}
+              density={0.7}
+              twinkle={1}
+              zoom={2.6}
+              backgroundGlow={0.6}
+              opacity={0.8}
+              mouseInteraction={true}
+              mouseStrength={0.6}
+              mouseRadius={0.9}
+            />
+          </div>
 
-        {/* Main Headline */}
-        <h2 className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl text-ink tracking-tight max-w-3xl mx-auto leading-[1.15]">
-          Discover your highest-leverage tech path in <span className="text-forest">3 minutes.</span>
-        </h2>
+          {/* Content Lockup floating over the WebGL background */}
+          <div className="relative z-10 max-w-3xl mx-auto space-y-6 sm:space-y-8">
+            
+            {/* Eyebrow Tag */}
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 border border-white/20 text-xs font-mono font-semibold uppercase tracking-wider text-signal shadow-xs backdrop-blur-md">
+              <Sparkles className="w-3.5 h-3.5 text-signal" />
+              <span>AI SKILL DIAGNOSTIC</span>
+            </div>
 
-        {/* Subhead */}
-        <p className="text-base sm:text-lg text-ink/75 font-body leading-relaxed max-w-2xl mx-auto">
-          Stop guessing which framework to learn or struggling alone. Our diagnostic maps your problem-solving tendencies directly to high-demand tracks and senior ABUAD mentors.
-        </p>
+            {/* Main Headline */}
+            <h2 className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl text-paper tracking-tight leading-[1.12]">
+              Discover your highest-leverage tech path in <span className="text-signal">3 minutes.</span>
+            </h2>
 
-        {/* 3 Clean Horizontal Value Highlights */}
-        <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-xs sm:text-sm font-mono text-ink/80 pt-2">
-          <span className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-forest" />
-            <span>15+ Tech Sub-Domains</span>
-          </span>
-          <span className="flex items-center gap-2">
-            <Zap className="w-4 h-4 text-signal" />
-            <span>Instant Mentor Match</span>
-          </span>
-          <span className="flex items-center gap-2">
-            <Award className="w-4 h-4 text-gold" />
-            <span>Custom Semester Roadmap</span>
-          </span>
-        </div>
+            {/* Subhead */}
+            <p className="text-base sm:text-lg text-paper/80 font-body leading-relaxed max-w-2xl mx-auto">
+              Stop guessing which framework to learn or struggling alone. Our diagnostic maps your problem-solving tendencies directly to high-demand tracks and senior ABUAD mentors.
+            </p>
 
-        {/* CTA Button & Social Proof */}
-        <div className="pt-4 flex flex-col items-center gap-3">
-          <button
-            onClick={onOpenQuiz}
-            className="px-8 py-4 rounded-full bg-forest hover:bg-forest-dark text-paper font-semibold text-sm sm:text-base transition-all duration-150 transform hover:scale-[1.02] shadow-sm flex items-center justify-center gap-2 group cursor-pointer"
-          >
-            <span>Take the 3-Minute Skill Quiz</span>
-            <ArrowRight className="w-4 h-4 text-paper/70 group-hover:translate-x-1 transition-transform" />
-          </button>
+            {/* 3 Clean Horizontal Value Highlights */}
+            <div className="flex flex-wrap items-center justify-center gap-x-6 sm:gap-x-8 gap-y-2.5 text-xs sm:text-sm font-mono text-paper/85 pt-1">
+              <span className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-signal" />
+                <span>15+ Tech Sub-Domains</span>
+              </span>
+              <span className="flex items-center gap-2">
+                <Zap className="w-4 h-4 text-signal" />
+                <span>Instant Mentor Match</span>
+              </span>
+              <span className="flex items-center gap-2">
+                <Award className="w-4 h-4 text-gold" />
+                <span>Custom Semester Roadmap</span>
+              </span>
+            </div>
 
-          <p className="text-xs font-mono text-ink/50">
-            Free · No login required to start · 1,200+ students calibrated
-          </p>
+            {/* Action CTA Button */}
+            <div className="pt-3 flex flex-col items-center gap-3">
+              <button
+                onClick={onOpenQuiz}
+                className="px-8 py-4 rounded-full bg-forest hover:bg-forest-light text-paper border border-white/20 font-semibold text-sm sm:text-base transition-all duration-150 transform hover:scale-[1.02] shadow-lg flex items-center justify-center gap-2 group cursor-pointer backdrop-blur-md"
+              >
+                <span>Take the 3-Minute Skill Quiz</span>
+                <ArrowRight className="w-4 h-4 text-signal group-hover:translate-x-1 transition-transform" />
+              </button>
+
+              <p className="text-xs font-mono text-paper/50">
+                Free · No login required to start · 1,200+ ABUAD students calibrated
+              </p>
+            </div>
+
+          </div>
+
         </div>
 
       </div>
