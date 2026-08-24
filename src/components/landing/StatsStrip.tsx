@@ -80,7 +80,7 @@ function MetricItem({
 
 export default function StatsStrip() {
   return (
-    <section className="py-10 sm:py-16 bg-paper border-t border-line/60">
+    <section className="py-10 sm:py-16 bg-paper">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 lg:grid-cols-4">
           
