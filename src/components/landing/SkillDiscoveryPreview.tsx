@@ -10,10 +10,10 @@ interface SkillDiscoveryPreviewProps {
 
 export default function SkillDiscoveryPreview({ onOpenQuiz }: SkillDiscoveryPreviewProps) {
   return (
-    <section id="skills" className="relative w-full py-24 sm:py-32 bg-[#0A160F] text-paper border-t border-line/20 overflow-hidden">
+    <section id="skills" className="relative w-full py-24 sm:py-32 bg-[#0A160F] text-paper border-t border-line/15 overflow-hidden">
       
-      {/* Lightfall WebGL Canvas running across the entire dark section */}
-      <div className="absolute inset-0 w-full h-full pointer-events-none select-none -z-0 opacity-85">
+      {/* 1. Base Layer: Lightfall WebGL Shimmer Stream */}
+      <div className="absolute inset-0 w-full h-full pointer-events-none select-none z-0 opacity-90">
         <Lightfall
           colors={["#3DDC84", "#008751", "#235F41", "#C89B3C"]}
           backgroundColor="#0A160F"
@@ -26,14 +26,17 @@ export default function SkillDiscoveryPreview({ onOpenQuiz }: SkillDiscoveryPrev
           twinkle={1}
           zoom={2.6}
           backgroundGlow={0.6}
-          opacity={0.85}
+          opacity={0.9}
           mouseInteraction={true}
           mouseStrength={0.6}
           mouseRadius={0.9}
         />
       </div>
 
-      {/* Content Container laid openly across the canvas */}
+      {/* 2. Glassmorphism Frosted Blur Layer (Maximizes text contrast and softens background streaks) */}
+      <div className="absolute inset-0 w-full h-full pointer-events-none z-1 bg-gradient-to-b from-[#0A160F]/70 via-[#0A160F]/55 to-[#0A160F]/70 backdrop-blur-[6px]" />
+
+      {/* 3. Content Container on Top of the Glass Layer */}
       <div className="relative z-10 max-w-5xl mx-auto px-6 sm:px-8 text-center space-y-7 sm:space-y-8">
         
         {/* Eyebrow Tag */}
@@ -43,17 +46,17 @@ export default function SkillDiscoveryPreview({ onOpenQuiz }: SkillDiscoveryPrev
         </div>
 
         {/* Main Headline */}
-        <h2 className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl text-paper tracking-tight max-w-3xl mx-auto leading-[1.12]">
+        <h2 className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl text-paper tracking-tight max-w-3xl mx-auto leading-[1.12] drop-shadow-sm">
           Discover your highest-leverage tech path in <span className="text-signal">3 minutes.</span>
         </h2>
 
         {/* Subhead */}
-        <p className="text-base sm:text-lg text-paper/80 font-body leading-relaxed max-w-2xl mx-auto">
+        <p className="text-base sm:text-lg text-paper/90 font-body leading-relaxed max-w-2xl mx-auto drop-shadow-xs">
           Stop guessing which framework to learn or struggling alone. Our diagnostic maps your problem-solving tendencies directly to high-demand tracks and senior ABUAD mentors.
         </p>
 
         {/* 3 Clean Horizontal Value Highlights */}
-        <div className="flex flex-wrap items-center justify-center gap-x-6 sm:gap-x-8 gap-y-2.5 text-xs sm:text-sm font-mono text-paper/85 pt-1">
+        <div className="flex flex-wrap items-center justify-center gap-x-6 sm:gap-x-8 gap-y-2.5 text-xs sm:text-sm font-mono text-paper/90 pt-1">
           <span className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-signal" />
             <span>15+ Tech Sub-Domains</span>
@@ -78,7 +81,7 @@ export default function SkillDiscoveryPreview({ onOpenQuiz }: SkillDiscoveryPrev
             <ArrowRight className="w-4 h-4 text-signal group-hover:translate-x-1 transition-transform" />
           </button>
 
-          <p className="text-xs font-mono text-paper/50">
+          <p className="text-xs font-mono text-paper/60">
             Free · No login required to start · 1,200+ ABUAD students calibrated
           </p>
         </div>
