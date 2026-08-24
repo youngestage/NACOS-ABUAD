@@ -10,7 +10,7 @@ interface StatItemProps {
   decimals?: number;
   label: string;
   sublabel?: string;
-  showDivider?: boolean;
+  className?: string;
 }
 
 function MetricItem({
@@ -20,7 +20,7 @@ function MetricItem({
   decimals = 0,
   label,
   sublabel,
-  showDivider = true,
+  className = "",
 }: StatItemProps) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, amount: 0.35 });
@@ -57,21 +57,19 @@ function MetricItem({
       initial={{ opacity: 0, y: 16 }}
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className={`flex flex-col justify-center px-6 sm:px-8 py-4 ${
-        showDivider ? "border-l border-line" : ""
-      }`}
+      className={`flex flex-col justify-center px-4 sm:px-6 lg:px-8 py-3 sm:py-4 ${className}`}
     >
-      <div className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl text-ink tracking-tight flex items-baseline">
+      <div className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl xl:text-6xl text-ink tracking-tight flex items-baseline">
         <span>{prefix}</span>
         <span className="tabular-nums">{formattedValue}</span>
         <span className="text-forest ml-0.5">{suffix}</span>
       </div>
-      <div className="mt-2 space-y-0.5">
-        <p className="font-mono text-xs sm:text-sm font-semibold uppercase tracking-wider text-ink/80">
+      <div className="mt-1.5 sm:mt-2 space-y-0.5">
+        <p className="font-mono text-xs sm:text-sm font-semibold uppercase tracking-wider text-ink/85">
           {label}
         </p>
         {sublabel && (
-          <p className="text-[11px] font-mono text-ink/50">
+          <p className="text-[11px] sm:text-xs font-mono text-ink/55 leading-relaxed">
             {sublabel}
           </p>
         )}
@@ -82,38 +80,47 @@ function MetricItem({
 
 export default function StatsStrip() {
   return (
-    <section className="py-10 sm:py-14 bg-paper">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-8">
+    <section className="py-10 sm:py-16 bg-paper border-t border-line/60">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4">
+          
+          {/* Metric 1: Top-Left on Mobile, 1st on Desktop */}
           <MetricItem
             endValue={140}
             suffix="+"
             label="Active Mentors"
             sublabel="Verified senior & alumni leads"
-            showDivider={false}
+            className=""
           />
+
+          {/* Metric 2: Top-Right on Mobile, 2nd on Desktop */}
           <MetricItem
             endValue={1280}
             suffix="+"
             label="Students Matched"
             sublabel="Across 15+ sub-domains"
-            showDivider={true}
+            className="border-l border-line"
           />
+
+          {/* Metric 3: Bottom-Left on Mobile, 3rd on Desktop */}
           <MetricItem
             endValue={91.4}
             suffix="%"
             decimals={1}
             label="Completion Rate"
             sublabel="Verified milestone submissions"
-            showDivider={true}
+            className="border-t border-line/60 pt-6 sm:pt-8 lg:border-t-0 lg:pt-4 lg:border-l lg:border-line"
           />
+
+          {/* Metric 4: Bottom-Right on Mobile, 4th on Desktop */}
           <MetricItem
             endValue={28}
             suffix="+"
             label="Skill Tracks"
             sublabel="Curated career roadmaps"
-            showDivider={true}
+            className="border-l border-line border-t border-line/60 pt-6 sm:pt-8 lg:border-t-0 lg:pt-4"
           />
+
         </div>
       </div>
     </section>
