@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   Sparkles,
@@ -9,170 +10,242 @@ import {
   Cloud,
   Cpu,
   Palette,
-  Terminal,
   CheckCircle2,
-  Users,
   Zap,
-  RotateCcw,
+  TrendingUp,
+  GitPullRequest,
+  Star,
+  Terminal,
+  Award,
 } from "lucide-react";
 
 interface SkillDiscoveryPreviewProps {
   onOpenQuiz: () => void;
 }
 
-interface Trait {
+interface TrackArchetype {
   id: string;
-  label: string;
-  icon: string;
-  trackId: string;
-}
-
-interface TrackData {
-  id: string;
+  tabLabel: string;
+  badge: string;
   title: string;
-  category: string;
   icon: React.ReactNode;
   matchScore: number;
-  rationale: string;
-  coreStack: string[];
-  mentorsCount: number;
-  placementOutcome: string;
-  secondaryTitle: string;
-  secondaryCategory: string;
-  secondaryScore: number;
-  secondaryStack: string[];
-  tertiaryTitle: string;
-  tertiaryCategory: string;
-  tertiaryScore: number;
-  tertiaryStack: string[];
+  marketDemand: "Extreme 🔥" | "Very High ⚡" | "High 🚀";
+  systemBreakdown: {
+    label: string;
+    score: number;
+  }[];
+  roadmap: {
+    weeks: string;
+    milestone: string;
+    detail: string;
+    status: "done" | "active" | "target";
+  }[];
+  stack: string[];
+  mentor: {
+    name: string;
+    role: string;
+    company: string;
+    avatarInitials: string;
+    avatarBg: string;
+    rating: string;
+    mentees: number;
+  };
 }
 
-const traits: Trait[] = [
-  { id: "sec", label: "Breaking & Securing Protocols", icon: "🛡️", trackId: "cybersecurity" },
-  { id: "cloud", label: "Scaling Distributed Clouds", icon: "☁️", trackId: "cloud" },
-  { id: "ai", label: "Training AI & Neural Models", icon: "🤖", trackId: "ai" },
-  { id: "ui", label: "Pixel-Perfect UI & Interaction", icon: "🎨", trackId: "design" },
-  { id: "devops", label: "CI/CD Automation & Pipelines", icon: "⚡", trackId: "devops" },
+const archetypes: TrackArchetype[] = [
+  {
+    id: "security",
+    tabLabel: "Systems & Security",
+    badge: "SYSTEMS SECURITY ARCHETYPE",
+    title: "Cybersecurity & Kernel Defense",
+    icon: <Shield className="w-4 h-4 text-signal" />,
+    matchScore: 96,
+    marketDemand: "Extreme 🔥",
+    systemBreakdown: [
+      { label: "Socket & Packet Inspection", score: 96 },
+      { label: "Cryptographic Protocols", score: 92 },
+      { label: "Linux Daemon Hardening", score: 94 },
+      { label: "Reverse Engineering", score: 88 },
+    ],
+    roadmap: [
+      {
+        weeks: "W1-W2",
+        milestone: "Network Protocol Audits",
+        detail: "Wireshark packet tracing & TCP/IP handshake vulnerability analysis",
+        status: "done",
+      },
+      {
+        weeks: "W3-W4",
+        milestone: "Custom Firewall Scanner",
+        detail: "Building an async Python socket port scanner with CVE matching",
+        status: "active",
+      },
+      {
+        weeks: "W5-W6",
+        milestone: "Production SIWES Defense",
+        detail: "Penetration testing sandbox and verifiable NACOS security credential",
+        status: "target",
+      },
+    ],
+    stack: ["Wireshark", "Burp Suite", "Linux", "OWASP", "Python Sec", "Metasploit"],
+    mentor: {
+      name: "Tobi Ogunlesi",
+      role: "Software Engineering, 500L",
+      company: "CyberSOC SIWES Fellow",
+      avatarInitials: "TO",
+      avatarBg: "bg-[#0F1912]",
+      rating: "4.98",
+      mentees: 18,
+    },
+  },
+  {
+    id: "cloud",
+    tabLabel: "Cloud & Distributed",
+    badge: "INFRASTRUCTURE ARCHETYPE",
+    title: "Cloud & Microservice Architecture",
+    icon: <Cloud className="w-4 h-4 text-signal" />,
+    matchScore: 95,
+    marketDemand: "Very High ⚡",
+    systemBreakdown: [
+      { label: "Multi-Region Microservices", score: 95 },
+      { label: "Async Message Queues", score: 91 },
+      { label: "Container Orchestration", score: 94 },
+      { label: "Database Clustering", score: 89 },
+    ],
+    roadmap: [
+      {
+        weeks: "W1-W2",
+        milestone: "Dockerized Microservices",
+        detail: "Modular service separation with REST/gRPC and Docker Compose",
+        status: "done",
+      },
+      {
+        weeks: "W3-W4",
+        milestone: "Terraform Multi-Cloud Infra",
+        detail: "Automating AWS VPCs, ECS clusters, and Redis caching layers",
+        status: "active",
+      },
+      {
+        weeks: "W5-W6",
+        milestone: "Fault-Tolerant Deployments",
+        detail: "Zero-downtime blue/green rollouts with Prometheus observability",
+        status: "target",
+      },
+    ],
+    stack: ["AWS / GCP", "Terraform", "Docker", "Kubernetes", "Redis", "Kafka"],
+    mentor: {
+      name: "Farouq Mohammed",
+      role: "CS Alumni, Class of '24",
+      company: "Cloud Associate @ Sterling",
+      avatarInitials: "FM",
+      avatarBg: "bg-forest",
+      rating: "5.00",
+      mentees: 24,
+    },
+  },
+  {
+    id: "ai",
+    tabLabel: "AI & Machine Learning",
+    badge: "INTELLIGENCE ARCHETYPE",
+    title: "Applied AI & Neural Systems",
+    icon: <Cpu className="w-4 h-4 text-signal" />,
+    matchScore: 97,
+    marketDemand: "Extreme 🔥",
+    systemBreakdown: [
+      { label: "Transformer Architecture", score: 97 },
+      { label: "Vector Search & Embeddings", score: 94 },
+      { label: "Low-Latency Inference API", score: 92 },
+      { label: "Data Pipeline Automation", score: 90 },
+    ],
+    roadmap: [
+      {
+        weeks: "W1-W2",
+        milestone: "PyTorch Foundations",
+        detail: "Tensor operations, backpropagation, and loss surface optimization",
+        status: "done",
+      },
+      {
+        weeks: "W3-W4",
+        milestone: "RAG & LLM Fine-Tuning",
+        detail: "Embedding retrieval with pgvector, Chroma, and FastAPI endpoints",
+        status: "active",
+      },
+      {
+        weeks: "W5-W6",
+        milestone: "Production AI Assistant",
+        detail: "GPU model quantization and deployed fullstack AI web application",
+        status: "target",
+      },
+    ],
+    stack: ["PyTorch", "Hugging Face", "FastAPI", "pgvector", "LangChain", "Docker"],
+    mentor: {
+      name: "Kenechukwu Okafor",
+      role: "Computer Science, 400L",
+      company: "AI Researcher (A+ Thesis)",
+      avatarInitials: "KO",
+      avatarBg: "bg-gold",
+      rating: "4.96",
+      mentees: 15,
+    },
+  },
+  {
+    id: "product",
+    tabLabel: "Product & UI Engineering",
+    badge: "FRONTEND ARCHETYPE",
+    title: "Fullstack Product & Design Systems",
+    icon: <Palette className="w-4 h-4 text-signal" />,
+    matchScore: 94,
+    marketDemand: "Very High ⚡",
+    systemBreakdown: [
+      { label: "Design Token Architecture", score: 96 },
+      { label: "React / Next.js Server Actions", score: 94 },
+      { label: "Framer Motion Micro-Interactions", score: 92 },
+      { label: "Accessible Semantic Markup", score: 95 },
+    ],
+    roadmap: [
+      {
+        weeks: "W1-W2",
+        milestone: "Figma Token Pipeline",
+        detail: "Building atomic design libraries and translating tokens to Tailwind",
+        status: "done",
+      },
+      {
+        weeks: "W3-W4",
+        milestone: "Interactive Web App",
+        detail: "Optimistic UI updates, fluid gestures, and TanStack state slices",
+        status: "active",
+      },
+      {
+        weeks: "W5-W6",
+        milestone: "Production Portfolio Ship",
+        detail: "Lighthouse 100 performance score and hackathon submission launch",
+        status: "target",
+      },
+    ],
+    stack: ["Next.js", "Tailwind CSS", "TypeScript", "Framer Motion", "Prisma", "Figma"],
+    mentor: {
+      name: "Chidinma Adeleke",
+      role: "Computer Science, 300L",
+      company: "Placed at Paystack (Intern)",
+      avatarInitials: "CA",
+      avatarBg: "bg-forest-light",
+      rating: "4.99",
+      mentees: 21,
+    },
+  },
 ];
 
-const trackProfiles: Record<string, TrackData> = {
-  cybersecurity: {
-    id: "cybersecurity",
-    title: "Cybersecurity & Defense",
-    category: "Systems Security",
-    icon: <Shield className="w-5 h-5 text-forest" />,
-    matchScore: 96,
-    rationale:
-      "High natural aptitude for network packet analysis, kernel security audits, and ethical penetration testing.",
-    coreStack: ["Wireshark", "Burp Suite", "Linux Hardening", "OWASP Top 10", "Python Sec"],
-    mentorsCount: 14,
-    placementOutcome: "Top Placements: Moniepoint, Interswitch & CyberSOC",
-    secondaryTitle: "DevOps & Release Eng",
-    secondaryCategory: "Automation",
-    secondaryScore: 88,
-    secondaryStack: ["GitHub Actions", "Kubernetes", "Docker", "Prometheus"],
-    tertiaryTitle: "Cloud Architecture",
-    tertiaryCategory: "Infrastructure",
-    tertiaryScore: 82,
-    tertiaryStack: ["AWS / GCP", "Terraform", "Serverless", "Database Clustering"],
-  },
-  cloud: {
-    id: "cloud",
-    title: "Cloud Computing & Architecture",
-    category: "Distributed Infrastructure",
-    icon: <Cloud className="w-5 h-5 text-forest" />,
-    matchScore: 95,
-    rationale:
-      "Strong intuition for multi-region microservices, asynchronous message queues, and fault-tolerant serverless clusters.",
-    coreStack: ["AWS / GCP", "Terraform", "Docker", "Kubernetes", "Redis Caching"],
-    mentorsCount: 19,
-    placementOutcome: "Top Placements: Paystack, Sterling Bank & AWS Community",
-    secondaryTitle: "DevOps & Reliability",
-    secondaryCategory: "Automation",
-    secondaryScore: 90,
-    secondaryStack: ["CI/CD Pipelines", "Helm", "Nginx", "Grafana"],
-    tertiaryTitle: "Backend Systems",
-    tertiaryCategory: "Software Eng",
-    tertiaryScore: 85,
-    tertiaryStack: ["Node.js / Go", "PostgreSQL", "Kafka", "gRPC"],
-  },
-  ai: {
-    id: "ai",
-    title: "AI & Machine Learning Systems",
-    category: "Applied Intelligence",
-    icon: <Cpu className="w-5 h-5 text-forest" />,
-    matchScore: 97,
-    rationale:
-      "Exceptional affinity for mathematical modeling, PyTorch transformer architectures, and scalable inference pipelines.",
-    coreStack: ["PyTorch", "Hugging Face", "FastAPI", "Vector DBs", "NumPy / Pandas"],
-    mentorsCount: 12,
-    placementOutcome: "Top Placements: DataCamp, Google Developer Experts & Research",
-    secondaryTitle: "Data Engineering",
-    secondaryCategory: "Big Data Infra",
-    secondaryScore: 89,
-    secondaryStack: ["Apache Spark", "Airflow", "dbt", "Snowflake"],
-    tertiaryTitle: "Backend Systems",
-    tertiaryCategory: "Engineering",
-    tertiaryScore: 84,
-    tertiaryStack: ["Python", "Docker", "PostgreSQL", "REST APIs"],
-  },
-  design: {
-    id: "design",
-    title: "UI/UX & Product Engineering",
-    category: "Frontend & Interaction",
-    icon: <Palette className="w-5 h-5 text-forest" />,
-    matchScore: 94,
-    rationale:
-      "Sharp eye for spatial layout, design token systems, accessible micro-interactions, and high-performance component trees.",
-    coreStack: ["Figma Tokens", "Tailwind CSS", "Next.js", "Framer Motion", "Storybook"],
-    mentorsCount: 16,
-    placementOutcome: "Top Placements: Flutterwave, Kuda Bank & Design Agencies",
-    secondaryTitle: "Fullstack Web Eng",
-    secondaryCategory: "Web Systems",
-    secondaryScore: 87,
-    secondaryStack: ["TypeScript", "React", "Server Actions", "Prisma"],
-    tertiaryTitle: "Mobile Dev (Flutter)",
-    tertiaryCategory: "Mobile Apps",
-    tertiaryScore: 81,
-    tertiaryStack: ["Dart", "Bloc Architecture", "iOS / Android", "Firebase"],
-  },
-  devops: {
-    id: "devops",
-    title: "DevOps & Infrastructure Automation",
-    category: "Platform Engineering",
-    icon: <Terminal className="w-5 h-5 text-forest" />,
-    matchScore: 96,
-    rationale:
-      "Prefers automated testing suites, declarative infrastructure as code, container orchestration, and zero-downtime deployments.",
-    coreStack: ["GitHub Actions", "Terraform", "Kubernetes", "Ansible", "Nginx"],
-    mentorsCount: 15,
-    placementOutcome: "Top Placements: Sterling Bank, Moniepoint & AWS Community",
-    secondaryTitle: "Cloud Architecture",
-    secondaryCategory: "Infrastructure",
-    secondaryScore: 91,
-    secondaryStack: ["AWS", "Docker", "Serverless", "Vault"],
-    tertiaryTitle: "Cybersecurity & Audit",
-    tertiaryCategory: "Security",
-    tertiaryScore: 83,
-    tertiaryStack: ["Linux", "SSL/TLS", "SIEM", "Hardening"],
-  },
-};
-
 export default function SkillDiscoveryPreview({ onOpenQuiz }: SkillDiscoveryPreviewProps) {
-  const [selectedTrait, setSelectedTrait] = useState<string>("sec");
+  const [selectedId, setSelectedId] = useState<string>("security");
   const prefersReduced = useReducedMotion();
 
-  const activeTrait = traits.find((t) => t.id === selectedTrait) || traits[0];
-  const activeProfile = trackProfiles[activeTrait.trackId] || trackProfiles.cybersecurity;
-
-  const radius = 26;
-  const circumference = 2 * Math.PI * radius;
-  const strokeOffset = circumference * (1 - activeProfile.matchScore / 100);
+  const active = archetypes.find((a) => a.id === selectedId) || archetypes[0];
 
   return (
     <section id="skills" className="py-20 sm:py-28 bg-paper border-t border-line relative overflow-hidden">
-      {/* Ambient background glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[450px] bg-gradient-to-b from-forest/5 via-[#3DDC84]/5 to-transparent blur-3xl -z-10 pointer-events-none" />
+      {/* Subtle background ambient mesh */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[450px] bg-gradient-to-b from-forest/5 via-[#3DDC84]/5 to-transparent blur-3xl -z-10 pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-6 sm:px-8">
         
@@ -181,268 +254,249 @@ export default function SkillDiscoveryPreview({ onOpenQuiz }: SkillDiscoveryPrev
           <div className="max-w-2xl space-y-3">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-forest/10 border border-forest/15 text-xs font-mono font-semibold uppercase tracking-wider text-forest">
               <Sparkles className="w-3.5 h-3.5 text-signal" />
-              <span>AI-POWERED APTITUDE CALIBRATION</span>
+              <span>AI CAREER TELEMETRY & BLUEPRINT</span>
             </div>
             <h2 className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl text-ink tracking-tight">
-              Discover your highest-leverage tech path.
+              Your custom semester engineering roadmap<span className="text-forest">.</span>
             </h2>
             <p className="text-base sm:text-lg text-ink/75 font-body leading-relaxed">
-              Every student learns differently. Select your natural problem-solving tendencies below to see live aptitude matching.
+              Stop guessing what framework to learn. Our diagnostic calibrates your problem-solving style directly to high-demand Nigerian tech tracks and ABUAD mentors.
             </p>
           </div>
 
           <button
             onClick={onOpenQuiz}
-            className="self-start md:self-auto px-6 py-3 rounded-full bg-forest hover:bg-forest-dark text-paper text-xs sm:text-sm font-semibold inline-flex items-center gap-2 transition-all duration-150 transform hover:scale-[1.02] shadow-xs cursor-pointer shrink-0"
+            className="self-start md:self-auto px-6 py-3.5 rounded-full bg-forest hover:bg-forest-dark text-paper text-xs sm:text-sm font-semibold inline-flex items-center gap-2 transition-all duration-150 transform hover:scale-[1.02] shadow-sm cursor-pointer shrink-0"
           >
-            <span>Take full diagnostic quiz</span>
+            <span>Take 3-min Diagnostic</span>
             <ArrowRight className="w-4 h-4 text-signal" />
           </button>
         </div>
 
-        {/* Interactive Problem-Solving Traits Selector */}
-        <div className="mb-10 sm:mb-12">
-          <div className="flex items-center justify-between gap-3 mb-3">
-            <span className="font-mono text-xs text-ink/60 uppercase tracking-wider font-semibold">
-              Select Your Engineering Tendency:
-            </span>
-            <span className="text-[11px] font-mono text-forest flex items-center gap-1 hidden sm:inline-flex">
-              <Zap className="w-3 h-3 text-signal" /> Live Match Recalculation Active
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-none">
-            {traits.map((trait) => {
-              const isSelected = selectedTrait === trait.id;
-              return (
-                <button
-                  key={trait.id}
-                  onClick={() => setSelectedTrait(trait.id)}
-                  className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-mono transition-all duration-150 flex items-center gap-2 shrink-0 cursor-pointer border ${
-                    isSelected
-                      ? "bg-forest text-paper border-forest shadow-xs font-semibold scale-[1.02]"
-                      : "bg-white text-ink/75 hover:text-ink hover:bg-white/90 border-line shadow-2xs"
-                  }`}
-                >
-                  <span>{trait.icon}</span>
-                  <span>{trait.label}</span>
-                </button>
-              );
-            })}
-          </div>
+        {/* Interactive Archetype Switcher Tabs */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-8 scrollbar-none">
+          {archetypes.map((arch) => {
+            const isSelected = selectedId === arch.id;
+            return (
+              <button
+                key={arch.id}
+                onClick={() => setSelectedId(arch.id)}
+                className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-mono transition-all duration-150 flex items-center gap-2 shrink-0 cursor-pointer border ${
+                  isSelected
+                    ? "bg-forest text-paper border-forest shadow-xs font-semibold"
+                    : "bg-white text-ink/70 hover:text-ink hover:bg-white/90 border-line shadow-2xs"
+                }`}
+              >
+                <span>{arch.icon}</span>
+                <span>{arch.tabLabel}</span>
+                {isSelected && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-signal ml-1" />
+                )}
+              </button>
+            );
+          })}
         </div>
 
-        {/* Master Bento Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
+        {/* Master Bento Grid (3-Module Architectural Matrix) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
           
-          {/* Left Column: Primary Spotlight Match Card (7 cols) */}
-          <div className="lg:col-span-7 bg-white rounded-3xl border border-line p-6 sm:p-8 lg:p-10 shadow-2xs flex flex-col justify-between relative overflow-hidden">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeProfile.id}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -12 }}
-                transition={{ duration: 0.25 }}
-                className="space-y-6"
-              >
-                {/* Header Row: Track Badge + Circular Match Gauge */}
-                <div className="flex items-start justify-between gap-4 pb-6 border-b border-line">
-                  <div className="space-y-2">
-                    <span className="font-mono text-xs uppercase tracking-wider text-forest font-semibold px-3 py-1 rounded-full bg-forest/10 border border-forest/15 inline-flex items-center gap-1.5">
-                      {activeProfile.icon}
-                      <span>{activeProfile.category}</span>
-                    </span>
-                    <h3 className="font-display font-bold text-2xl sm:text-3xl text-ink tracking-tight">
-                      {activeProfile.title}
-                    </h3>
-                  </div>
+          {/* Module 1: Competency Telemetry & Radar (4 Cols) */}
+          <div className="lg:col-span-4 bg-white rounded-3xl border border-line p-6 sm:p-7 shadow-2xs flex flex-col justify-between">
+            <div className="space-y-5">
+              <div className="flex items-center justify-between pb-4 border-b border-line">
+                <span className="font-mono text-xs font-bold text-forest uppercase tracking-wider">
+                  Aptitude Telemetry
+                </span>
+                <span className="inline-flex items-center gap-1 font-mono text-xs font-semibold text-signal bg-forest px-2.5 py-0.5 rounded-full">
+                  {active.marketDemand}
+                </span>
+              </div>
 
-                  {/* High-Contrast Signal Green Circular Gauge */}
-                  <div className="relative w-16 h-16 sm:w-18 sm:h-18 flex items-center justify-center shrink-0">
-                    <svg className="w-16 h-16 sm:w-18 sm:h-18 -rotate-90" viewBox="0 0 60 60">
-                      <circle
-                        cx="30"
-                        cy="30"
-                        r={radius}
-                        fill="none"
-                        stroke="#E8E5DC"
-                        strokeWidth="4.5"
+              {/* Central Match Gauge Metric */}
+              <div className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-paper/70 border border-line">
+                <div>
+                  <span className="text-[11px] font-mono text-ink/50 uppercase block">
+                    Diagnostic Match
+                  </span>
+                  <span className="font-display font-black text-3xl sm:text-4xl text-ink">
+                    {active.matchScore}%
+                  </span>
+                </div>
+                <div className="text-right">
+                  <span className="text-[11px] font-mono text-ink/50 uppercase block">
+                    Semester Target
+                  </span>
+                  <span className="font-mono font-bold text-xs text-forest block">
+                    Distinction Ready
+                  </span>
+                </div>
+              </div>
+
+              {/* 4 Fine-Grained Aptitude Bars */}
+              <div className="space-y-3 pt-1">
+                {active.systemBreakdown.map((item, idx) => (
+                  <div key={idx} className="space-y-1">
+                    <div className="flex items-center justify-between text-xs font-mono">
+                      <span className="text-ink/75 truncate">{item.label}</span>
+                      <span className="font-bold text-ink">{item.score}%</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-line rounded-full overflow-hidden">
+                      <motion.div
+                        key={`${active.id}-${idx}`}
+                        className="h-full bg-forest rounded-full"
+                        initial={prefersReduced ? {} : { width: 0 }}
+                        animate={{ width: `${item.score}%` }}
+                        transition={{ duration: 0.6, ease: "easeOut", delay: idx * 0.08 }}
                       />
-                      <motion.circle
-                        cx="30"
-                        cy="30"
-                        r={radius}
-                        fill="none"
-                        stroke="#3DDC84"
-                        strokeWidth="4.5"
-                        strokeLinecap="round"
-                        strokeDasharray={circumference}
-                        initial={prefersReduced ? {} : { strokeDashoffset: circumference }}
-                        animate={{ strokeDashoffset: strokeOffset }}
-                        transition={{ duration: 0.6, ease: "easeOut" }}
-                      />
-                    </svg>
-                    <div className="absolute flex flex-col items-center">
-                      <span className="font-mono text-xs sm:text-sm font-bold text-ink leading-none">
-                        {activeProfile.matchScore}%
-                      </span>
-                      <span className="text-[9px] font-mono text-ink/50 uppercase">Match</span>
                     </div>
                   </div>
-                </div>
+                ))}
+              </div>
+            </div>
 
-                {/* Rationale Copy */}
-                <div className="space-y-1.5">
-                  <span className="font-mono text-xs uppercase tracking-wider text-ink/50 font-semibold block">
-                    AI Match Rationale:
-                  </span>
-                  <p className="text-sm sm:text-base text-ink/80 font-body leading-relaxed">
-                    {activeProfile.rationale}
-                  </p>
-                </div>
-
-                {/* Core Stack Badges */}
-                <div className="space-y-2">
-                  <span className="font-mono text-xs uppercase tracking-wider text-ink/50 font-semibold block">
-                    Curated Core Stack:
-                  </span>
-                  <div className="flex flex-wrap gap-2">
-                    {activeProfile.coreStack.map((tech, idx) => (
-                      <span
-                        key={idx}
-                        className="px-3 py-1 rounded-lg bg-paper border border-line font-mono text-xs font-medium text-ink/85 shadow-2xs"
-                      >
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Placement Proof */}
-                <div className="p-3.5 rounded-2xl bg-paper/80 border border-line text-xs font-mono text-ink/75 flex items-center justify-between gap-3">
-                  <span className="font-semibold text-forest">Verified Track Proof:</span>
-                  <span className="text-ink/80 truncate">{activeProfile.placementOutcome}</span>
-                </div>
-              </motion.div>
-            </AnimatePresence>
-
-            {/* Bottom Action Footer */}
-            <div className="mt-8 pt-5 border-t border-line flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <span className="text-xs font-mono text-ink/65 flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-signal" />
-                <span>{activeProfile.mentorsCount} Verified ABUAD Mentors Available</span>
+            {/* Core Stack Pills */}
+            <div className="pt-5 mt-5 border-t border-line">
+              <span className="text-[11px] font-mono text-ink/50 uppercase tracking-wider block mb-2">
+                Production Toolchain:
               </span>
-
-              <button
-                onClick={onOpenQuiz}
-                className="text-xs sm:text-sm font-mono font-semibold text-forest hover:text-forest-dark inline-flex items-center gap-1.5 cursor-pointer group"
-              >
-                <span>Calibrate My Score</span>
-                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-              </button>
+              <div className="flex flex-wrap gap-1.5">
+                {active.stack.map((tech, idx) => (
+                  <span
+                    key={idx}
+                    className="px-2.5 py-0.5 rounded-md bg-paper border border-line font-mono text-[11px] text-ink/80 font-medium"
+                  >
+                    {tech}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Right Column: Secondary & Tertiary Complementary Matches (5 cols) */}
-          <div className="lg:col-span-5 flex flex-col gap-6">
-            
-            {/* Secondary Match Card */}
-            <div className="bg-white rounded-3xl border border-line p-6 sm:p-7 shadow-2xs flex flex-col justify-between flex-1 hover:border-forest/40 transition-colors">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-xs uppercase tracking-wider text-forest font-semibold bg-forest/10 px-2.5 py-0.5 rounded-full border border-forest/15">
-                    {activeProfile.secondaryCategory}
-                  </span>
-                  <span className="font-mono text-xs font-bold text-forest bg-signal/15 px-2.5 py-0.5 rounded-full">
-                    {activeProfile.secondaryScore}% Match
-                  </span>
-                </div>
-
+          {/* Module 2: 6-Week Structured Semester Roadmap (5 Cols) */}
+          <div className="lg:col-span-5 bg-white rounded-3xl border border-line p-6 sm:p-7 shadow-2xs flex flex-col justify-between">
+            <div className="space-y-5">
+              <div className="flex items-center justify-between pb-4 border-b border-line">
                 <div>
-                  <h4 className="font-display font-bold text-lg text-ink">
-                    {activeProfile.secondaryTitle}
-                  </h4>
-                  <p className="text-xs text-ink/65 font-body mt-1 leading-relaxed">
-                    Strong secondary alignment. Ideal for building multi-disciplinary technical breadth.
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {activeProfile.secondaryStack.map((tech, idx) => (
-                    <span
-                      key={idx}
-                      className="px-2.5 py-0.5 rounded bg-paper border border-line font-mono text-[11px] text-ink/75"
-                    >
-                      {tech}
-                    </span>
-                  ))}
+                  <span className="font-mono text-xs font-bold text-forest uppercase tracking-wider block">
+                    {active.badge}
+                  </span>
+                  <h3 className="font-display font-bold text-xl text-ink tracking-tight mt-0.5">
+                    {active.title}
+                  </h3>
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-line/60 flex items-center justify-between text-xs font-mono">
-                <span className="text-ink/50">#2 Ranked Affinity</span>
-                <button
-                  onClick={onOpenQuiz}
-                  className="text-forest hover:text-forest-dark font-semibold cursor-pointer"
-                >
-                  Explore →
-                </button>
+              {/* 3 Step Connected Roadmap Progression */}
+              <div className="space-y-4 relative">
+                {/* Vertical Step Connector Line */}
+                <div className="absolute left-3.5 top-3 bottom-3 w-0.5 bg-line -z-0" />
+
+                {active.roadmap.map((step, idx) => (
+                  <div key={idx} className="flex items-start gap-3.5 relative z-10">
+                    <div
+                      className={`w-7 h-7 rounded-full flex items-center justify-center font-mono text-xs font-bold shrink-0 border ${
+                        step.status === "done"
+                          ? "bg-forest text-paper border-forest"
+                          : step.status === "active"
+                          ? "bg-signal text-ink border-signal shadow-xs"
+                          : "bg-paper text-ink/50 border-line"
+                      }`}
+                    >
+                      {step.status === "done" ? "✓" : idx + 1}
+                    </div>
+
+                    <div className="space-y-0.5 flex-1 pt-0.5">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-[10px] font-bold text-forest bg-forest/10 px-1.5 py-0.5 rounded">
+                          {step.weeks}
+                        </span>
+                        <h4 className="font-display font-bold text-sm text-ink">
+                          {step.milestone}
+                        </h4>
+                      </div>
+                      <p className="text-xs text-ink/70 font-body leading-relaxed">
+                        {step.detail}
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Tertiary Match Card */}
-            <div className="bg-white rounded-3xl border border-line p-6 sm:p-7 shadow-2xs flex flex-col justify-between flex-1 hover:border-forest/40 transition-colors">
+            {/* Verification Tag */}
+            <div className="p-3 rounded-xl bg-forest/5 border border-forest/15 mt-5 flex items-center justify-between text-xs font-mono">
+              <span className="text-forest font-semibold flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-signal" />
+                <span>NACOS Verified Semester Syllabus</span>
+              </span>
+              <span className="text-ink/60">6-Week Track</span>
+            </div>
+          </div>
+
+          {/* Module 3: Paired Senior Mentor Spotlight (3 Cols) */}
+          <div className="lg:col-span-3 bg-white rounded-3xl border border-line p-6 sm:p-7 shadow-2xs flex flex-col justify-between">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-line">
+                <span className="font-mono text-xs font-bold text-forest uppercase tracking-wider">
+                  Lead Track Mentor
+                </span>
+                <span className="flex items-center gap-1 text-xs font-mono text-gold font-bold">
+                  <Star className="w-3.5 h-3.5 fill-gold" />
+                  {active.mentor.rating}
+                </span>
+              </div>
+
+              {/* Mentor Avatar Card */}
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-xs uppercase tracking-wider text-forest font-semibold bg-forest/10 px-2.5 py-0.5 rounded-full border border-forest/15">
-                    {activeProfile.tertiaryCategory}
-                  </span>
-                  <span className="font-mono text-xs font-bold text-forest bg-signal/15 px-2.5 py-0.5 rounded-full">
-                    {activeProfile.tertiaryScore}% Match
-                  </span>
+                <div
+                  className={`w-14 h-14 rounded-2xl ${active.mentor.avatarBg} text-paper border border-line flex items-center justify-center font-display font-bold text-lg shadow-sm`}
+                >
+                  {active.mentor.avatarInitials}
                 </div>
 
                 <div>
-                  <h4 className="font-display font-bold text-lg text-ink">
-                    {activeProfile.tertiaryTitle}
+                  <h4 className="font-display font-bold text-base text-ink">
+                    {active.mentor.name}
                   </h4>
-                  <p className="text-xs text-ink/65 font-body mt-1 leading-relaxed">
-                    Solid foundational synergy. Broadens your campus portfolio and SIWES flexibility.
+                  <p className="text-xs font-mono text-ink/65">
+                    {active.mentor.role}
+                  </p>
+                  <p className="text-xs font-mono font-medium text-forest mt-0.5">
+                    {active.mentor.company}
                   </p>
                 </div>
 
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {activeProfile.tertiaryStack.map((tech, idx) => (
-                    <span
-                      key={idx}
-                      className="px-2.5 py-0.5 rounded bg-paper border border-line font-mono text-[11px] text-ink/75"
-                    >
-                      {tech}
-                    </span>
-                  ))}
+                <div className="p-2.5 rounded-xl bg-paper border border-line text-xs font-mono text-ink/75 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span>Active Mentees:</span>
+                    <span className="font-bold text-ink">{active.mentor.mentees} students</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Async Reviews:</span>
+                    <span className="text-signal font-semibold">Sundays</span>
+                  </div>
                 </div>
-              </div>
-
-              <div className="mt-4 pt-3 border-t border-line/60 flex items-center justify-between text-xs font-mono">
-                <span className="text-ink/50">#3 Ranked Affinity</span>
-                <button
-                  onClick={onOpenQuiz}
-                  className="text-forest hover:text-forest-dark font-semibold cursor-pointer"
-                >
-                  Explore →
-                </button>
               </div>
             </div>
 
+            {/* Direct Booking Trigger */}
+            <div className="pt-4 border-t border-line">
+              <button
+                onClick={onOpenQuiz}
+                className="w-full py-2.5 rounded-xl bg-forest hover:bg-forest-dark text-paper font-semibold text-xs font-mono flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+              >
+                <span>Pair with Mentor</span>
+                <ArrowRight className="w-3.5 h-3.5 text-signal" />
+              </button>
+            </div>
           </div>
 
         </div>
 
         {/* Bottom Callout Banner */}
-        <div className="mt-12 text-center space-y-2">
+        <div className="mt-10 text-center space-y-2">
           <p className="text-xs sm:text-sm text-ink/70 font-body">
-            Not sure where you fit? Over 1,200+ NACOS students have calibrated their roadmap this session.
+            Not sure where you belong? 1,200+ NACOS students have calibrated their roadmap this semester.
           </p>
           <button
             onClick={onOpenQuiz}
