@@ -33,8 +33,8 @@ export default function SkillDiscoveryPreview({ onOpenQuiz }: SkillDiscoveryPrev
         />
       </div>
 
-      {/* 2. Glassmorphism Frosted Blur Layer (Maximizes text contrast and softens background streaks) */}
-      <div className="absolute inset-0 w-full h-full pointer-events-none z-1 bg-gradient-to-b from-[#0A160F]/70 via-[#0A160F]/55 to-[#0A160F]/70 backdrop-blur-[6px]" />
+      {/* 2. Glassmorphism Frosted Blur Layer (Subtle touch to maintain crisp streaks & clear text) */}
+      <div className="absolute inset-0 w-full h-full pointer-events-none z-1 bg-gradient-to-b from-[#0A160F]/45 via-[#0A160F]/30 to-[#0A160F]/45 backdrop-blur-[2px]" />
 
       {/* 3. Content Container on Top of the Glass Layer */}
       <div className="relative z-10 max-w-5xl mx-auto px-6 sm:px-8 text-center space-y-7 sm:space-y-8">
