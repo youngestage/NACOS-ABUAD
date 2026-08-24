@@ -200,24 +200,44 @@ export default function Hero({ onOpenQuiz, onOpenAuth }: HeroProps) {
           </a>
         </div>
 
-        {/* Infinite Looping TextLoop Strip from React Bits */}
-        <div className="mt-14 pt-8 border-t border-line w-full overflow-hidden">
+        {/* Responsive Infinite Looping Tracks Marquee */}
+        <div className="mt-12 sm:mt-16 pt-6 sm:pt-8 border-t border-line w-full overflow-hidden">
           <div className="relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]">
-            <TextLoop
-              text="NACOS ABUAD ✦ CYBERSECURITY ✦ CLOUD COMPUTING ✦ UI/UX DESIGN ✦ DEVOPS ✦ AI & MACHINE LEARNING ✦ FULLSTACK WEB ✦ EMBEDDED SYSTEMS ✦ DATA SCIENCE"
-              shape="line"
-              speed={75}
-              direction="forward"
-              separator="✦"
-              fontSize={17}
-              fontWeight={600}
-              letterSpacing={2}
-              uppercase
-              color="#71717A"
-              ribbon={false}
-              pauseOnHover={true}
-              className="w-full py-1 font-mono select-none"
-            />
+            <motion.div
+              className="flex items-center gap-6 sm:gap-8 w-max select-none py-1"
+              animate={prefersReduced ? {} : { x: ["0%", "-50%"] }}
+              transition={{
+                repeat: Infinity,
+                ease: "linear",
+                duration: 28,
+              }}
+              whileHover={{ animationPlayState: "paused" }}
+            >
+              {[...Array(2)].map((_, loopIdx) => (
+                <div key={loopIdx} className="flex items-center gap-6 sm:gap-8 shrink-0">
+                  {[
+                    "NACOS ABUAD",
+                    "CYBERSECURITY",
+                    "CLOUD COMPUTING",
+                    "UI/UX DESIGN",
+                    "DEVOPS",
+                    "AI & MACHINE LEARNING",
+                    "FULLSTACK WEB",
+                    "EMBEDDED SYSTEMS",
+                    "DATA SCIENCE",
+                  ].map((track, trackIdx) => (
+                    <div key={trackIdx} className="flex items-center gap-6 sm:gap-8">
+                      <span className="font-mono text-xs sm:text-sm font-semibold tracking-wider text-[#71717A] uppercase whitespace-nowrap">
+                        {track}
+                      </span>
+                      <span className="text-forest/60 text-xs sm:text-sm font-bold select-none">
+                        ✦
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </motion.div>
           </div>
         </div>
 
