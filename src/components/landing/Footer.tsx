@@ -111,9 +111,9 @@ export default function Footer() {
             © {new Date().getFullYear()} NACOS ABUAD
           </span>
           <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] sm:text-xs text-ink/65">
-            <span>Department of Computer Science</span>
+            <span>Department of Sciences</span>
             <span>·</span>
-            <span>College of Engineering & Sciences</span>
+            <span>College of Sciences</span>
           </div>
         </div>
 

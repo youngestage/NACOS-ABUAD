@@ -135,7 +135,7 @@ export default function MentorCTA({ onOpenMentorApply }: MentorCTAProps) {
                   </div>
 
                   <div className="pt-2.5 border-t border-line flex items-center justify-between text-[11px] font-mono text-ink/80">
-                    <span className="font-medium">Dept. of Computer Science</span>
+                    <span className="font-medium">Dept. of Sciences</span>
                     <span className="text-forest font-bold">Verified Seal</span>
                   </div>
                 </Card>
