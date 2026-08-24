@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Sparkles, Layers, Compass, Cpu, Users, Award, MessageSquareQuote, LogIn, ArrowRight } from "lucide-react";
+import { Menu, X, Sparkles, Layers, Cpu, Users, Award, MessageSquareQuote, LogIn, ArrowRight } from "lucide-react";
 import { useLiquidGlass } from "@/lib/liquid-glass";
 
 interface NavbarProps {
@@ -52,7 +52,7 @@ export default function Navbar({ onOpenQuiz, onOpenAuth }: NavbarProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const navRef = useRef<HTMLDivElement>(null);
 
-  // Apply ultra-clean subtle liquid glass refraction to the floating navbar
+  // Apply subtle liquid glass refraction only to desktop/closed floating pill
   useLiquidGlass(navRef, {
     scale: -45,
     chroma: 3,
@@ -65,32 +65,29 @@ export default function Navbar({ onOpenQuiz, onOpenAuth }: NavbarProps) {
   });
 
   useEffect(() => {
-    let lastScrollY = window.scrollY;
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      // Shrink when scrolled past 60px
-      if (currentScrollY > 60) {
+      if (window.scrollY > 60) {
         setScrolled(true);
       } else {
         setScrolled(false);
       }
-      lastScrollY = currentScrollY;
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
-    <header className="fixed top-3 sm:top-5 left-0 right-0 z-50 flex justify-center px-3 sm:px-6 pointer-events-none">
-      {/* Floating Dynamic Island / Pill: Shrinks on scroll, expands at top */}
+    <header className="fixed top-3 sm:top-5 left-0 right-0 z-50 flex flex-col items-center px-3 sm:px-6 pointer-events-none">
+      
+      {/* Floating Dynamic Island / Pill Header */}
       <motion.div
         ref={navRef}
         layout
         transition={{ type: "spring", stiffness: 350, damping: 30 }}
         className={`w-full rounded-full transition-all duration-300 pointer-events-auto border ${
           scrolled
-            ? "max-w-2xl bg-white/70 border-white/70 shadow-[0_12px_36px_rgba(15,25,18,0.1)] py-2 px-4 sm:px-5"
-            : "max-w-5xl bg-white/50 border-white/60 shadow-[0_8px_28px_rgba(15,25,18,0.05)] py-2.5 sm:py-3 px-4 sm:px-6"
+            ? "max-w-2xl bg-white/75 border-white/80 shadow-[0_12px_36px_rgba(15,25,18,0.1)] py-2 px-4 sm:px-5"
+            : "max-w-5xl bg-white/60 border-white/70 shadow-[0_8px_28px_rgba(15,25,18,0.05)] py-2.5 sm:py-3 px-4 sm:px-6"
         }`}
       >
         <div className="flex items-center justify-between gap-2">
@@ -217,62 +214,78 @@ export default function Navbar({ onOpenQuiz, onOpenAuth }: NavbarProps) {
             </button>
           </div>
 
-          {/* Mobile Hamburger Toggle */}
-          <div className="flex md:hidden items-center gap-1.5">
+          {/* Mobile Toggle & Quick Action */}
+          <div className="flex md:hidden items-center gap-2">
             <button
               onClick={onOpenQuiz}
-              className="px-3 py-1 rounded-full bg-forest text-paper text-xs font-semibold"
+              className="px-3 py-1 rounded-full bg-forest text-paper text-xs font-semibold shadow-xs"
             >
               Quiz
             </button>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-1.5 rounded-full text-ink hover:bg-white/50 border border-line-subtle"
+              className="p-1.5 rounded-full text-ink bg-white/60 hover:bg-white border border-line-subtle shadow-xs cursor-pointer"
               aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
             >
               {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
           </div>
         </div>
+      </motion.div>
 
-        {/* Mobile Drawer Menu inside floating island */}
+      {/* Dedicated Clean Mobile Dropdown Menu (Decoupled from liquid glass canvas) */}
+      <AnimatePresence>
         {mobileMenuOpen && (
-          <div className="md:hidden mt-3 pt-3 border-t border-line/60 flex flex-col gap-2 pb-2 text-xs font-mono">
-            {navItems.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className="py-1 text-ink/80 hover:text-forest flex items-center gap-2"
-              >
-                <span className="text-forest">{item.icon}</span>
-                <span>{item.label}</span>
-              </a>
-            ))}
+          <motion.div
+            initial={{ opacity: 0, y: -12, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.96 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="w-full max-w-sm mt-2.5 p-5 rounded-3xl bg-white/95 backdrop-blur-2xl border border-line shadow-2xl pointer-events-auto flex flex-col gap-3.5 z-50"
+          >
+            {/* Nav Links */}
+            <div className="flex flex-col gap-1">
+              {navItems.map((item) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-mono font-medium text-ink hover:text-forest hover:bg-forest/5 transition-colors"
+                >
+                  <span className="text-forest p-1.5 rounded-lg bg-forest/10">{item.icon}</span>
+                  <span>{item.label}</span>
+                </a>
+              ))}
+            </div>
 
-            <div className="pt-2 border-t border-line/40 flex items-center justify-between gap-2">
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  onOpenAuth("login");
-                }}
-                className="flex-1 py-1.5 text-center text-xs font-semibold text-ink bg-white/70 rounded-full border border-line"
-              >
-                Log in
-              </button>
+            {/* Mobile Auth and Action CTA */}
+            <div className="pt-3 border-t border-line/60 flex flex-col gap-2">
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
                   onOpenQuiz();
                 }}
-                className="flex-1 py-1.5 text-center text-xs font-semibold text-paper bg-forest rounded-full"
+                className="w-full py-2.5 rounded-xl bg-forest hover:bg-forest-dark text-paper font-semibold text-sm flex items-center justify-center gap-2 shadow-xs cursor-pointer"
               >
-                Start Quiz
+                <Sparkles className="w-3.5 h-3.5 text-signal" />
+                <span>Take Diagnostic Quiz</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenAuth("login");
+                }}
+                className="w-full py-2.5 rounded-xl bg-paper hover:bg-paper/80 border border-line text-ink font-mono text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <LogIn className="w-3.5 h-3.5 text-ink/70" />
+                <span>Student / Mentor Sign In</span>
               </button>
             </div>
-          </div>
+          </motion.div>
         )}
-      </motion.div>
+      </AnimatePresence>
+
     </header>
   );
 }
