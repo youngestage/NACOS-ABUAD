@@ -18,6 +18,32 @@ export default function AdminApplicationsPage() {
   const { getApplications, approveApplication, rejectApplication } = useAuth();
   const apps = getApplications();
   const [status, setStatus] = useState("all");
+  const [error, setError] = useState("");
+  const [pendingId, setPendingId] = useState<string | null>(null);
+
+  const handleApprove = async (id: string) => {
+    setError("");
+    setPendingId(id);
+    try {
+      await approveApplication(id);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to approve application.");
+    } finally {
+      setPendingId(null);
+    }
+  };
+
+  const handleReject = async (id: string) => {
+    setError("");
+    setPendingId(id);
+    try {
+      await rejectApplication(id);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to reject application.");
+    } finally {
+      setPendingId(null);
+    }
+  };
 
   const filtered = useMemo(
     () =>
@@ -81,14 +107,16 @@ export default function AdminApplicationsPage() {
             <SoftButton
               variant="primary"
               className="h-9 px-3 text-xs"
-              onClick={() => approveApplication(a.id)}
+              disabled={pendingId === a.id}
+              onClick={() => handleApprove(a.id)}
             >
               Approve
             </SoftButton>
             <SoftButton
               variant="soft"
               className="h-9 px-3 text-xs"
-              onClick={() => rejectApplication(a.id)}
+              disabled={pendingId === a.id}
+              onClick={() => handleReject(a.id)}
             >
               Reject
             </SoftButton>
@@ -104,6 +132,12 @@ export default function AdminApplicationsPage() {
       title="Mentor applications"
       description="Approve or reject applicants. Approvals unlock the mentor desk."
     >
+      {error && (
+        <p className="rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm text-red-700">
+          {error}
+        </p>
+      )}
+
       <FilterBar onReset={() => setStatus("all")}>
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-ink/45">Status</label>

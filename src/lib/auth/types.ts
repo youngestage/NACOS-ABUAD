@@ -17,11 +17,3 @@ export interface MockUser {
   createdAt: string;
 }
 
-export interface AuthSession {
-  user: MockUser;
-  signedInAt: string;
-}
-
-export const AUTH_STORAGE_KEY = "nacos_auth_session";
-export const AUTH_COOKIE_NAME = "nacos_auth_role";
-export const MOCK_STORE_KEY = "nacos_mock_store";

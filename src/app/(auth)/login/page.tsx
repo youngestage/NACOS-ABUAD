@@ -21,11 +21,11 @@ export default function LoginPage() {
     }
   }, [user, isLoading, router]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     setError("");
-    const result = signIn(email, password);
+    const result = await signIn(email, password);
     setSubmitting(false);
     if (!result.ok) {
       setError(result.error ?? "Sign in failed");
@@ -34,8 +34,12 @@ export default function LoginPage() {
     // redirect via effect after user updates
   };
 
-  const enterDemo = (role: "mentee" | "mentor" | "admin") => {
-    signInAsDemo(role);
+  const demoLoginEnabled = process.env.NEXT_PUBLIC_ENABLE_DEMO_LOGIN === "true";
+
+  const enterDemo = async (role: "mentee" | "mentor" | "admin") => {
+    setError("");
+    const result = await signInAsDemo(role);
+    if (!result.ok) setError(result.error ?? "Demo sign in failed");
   };
 
   return (
@@ -53,24 +57,26 @@ export default function LoginPage() {
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {(
-          [
-            ["mentee", "Enter as Mentee"],
-            ["mentor", "Enter as Mentor"],
-            ["admin", "Enter as Admin"],
-          ] as const
-        ).map(([role, label]) => (
-          <button
-            key={role}
-            type="button"
-            onClick={() => enterDemo(role)}
-            className="px-3 py-1.5 rounded-lg border border-line bg-white text-xs font-medium text-forest hover:border-forest hover:bg-signal-soft transition-colors"
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+      {demoLoginEnabled && (
+        <div className="flex flex-wrap gap-2">
+          {(
+            [
+              ["mentee", "Enter as Mentee"],
+              ["mentor", "Enter as Mentor"],
+              ["admin", "Enter as Admin"],
+            ] as const
+          ).map(([role, label]) => (
+            <button
+              key={role}
+              type="button"
+              onClick={() => enterDemo(role)}
+              className="px-3 py-1.5 rounded-lg border border-line bg-white text-xs font-medium text-forest hover:border-forest hover:bg-signal-soft transition-colors"
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">

@@ -6,16 +6,19 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { useAuth } from "@/lib/auth/auth-context";
 import { dashboardPathForUser } from "@/lib/auth/guards";
-import { TRACKS } from "@/data/mock/tracks";
+import { useTracks } from "@/lib/data/tracks";
 
 export default function SignupPage() {
   const { user, isLoading, signUp } = useAuth();
   const router = useRouter();
+  const tracks = useTracks();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [matricNumber, setMatricNumber] = useState("");
   const [track, setTrack] = useState("Fullstack");
   const [error, setError] = useState("");
+  const [needsConfirmation, setNeedsConfirmation] = useState(false);
 
   useEffect(() => {
     if (!isLoading && user) {
@@ -23,12 +26,31 @@ export default function SignupPage() {
     }
   }, [user, isLoading, router]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    const result = signUp({ fullName, email, matricNumber, track });
-    if (!result.ok) setError(result.error ?? "Signup failed");
+    const result = await signUp({ fullName, email, password, matricNumber, track });
+    if (!result.ok) {
+      setError(result.error ?? "Signup failed");
+      return;
+    }
+    if (result.needsEmailConfirmation) setNeedsConfirmation(true);
   };
+
+  if (needsConfirmation) {
+    return (
+      <div className="space-y-4 rounded-xl border border-signal bg-signal-soft p-5">
+        <p className="font-display font-semibold text-forest">Check your email</p>
+        <p className="text-sm text-ink/70">
+          We sent a confirmation link to <strong>{email}</strong>. Verify it, then come back
+          and sign in.
+        </p>
+        <Link href="/login" className="text-sm font-semibold text-forest hover:underline">
+          Back to login
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -41,7 +63,7 @@ export default function SignupPage() {
           Join Skills Hub
         </h2>
         <p className="text-ink/65 font-body text-sm">
-          Create a mentee profile. Demo signup stores your session locally.
+          Create a mentee profile with your ABUAD email.
         </p>
       </div>
 
@@ -73,6 +95,20 @@ export default function SignupPage() {
         </div>
         <div className="space-y-1.5">
           <label className="font-mono text-xs uppercase tracking-wider text-ink/50">
+            Password
+          </label>
+          <input
+            type="password"
+            required
+            minLength={8}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full rounded-xl border border-line bg-white px-4 py-3 text-sm outline-none focus:border-forest"
+            placeholder="At least 8 characters"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <label className="font-mono text-xs uppercase tracking-wider text-ink/50">
             Matric number
           </label>
           <input
@@ -92,7 +128,7 @@ export default function SignupPage() {
             onChange={(e) => setTrack(e.target.value)}
             className="w-full rounded-xl border border-line bg-white px-4 py-3 text-sm outline-none focus:border-forest"
           >
-            {TRACKS.map((t) => (
+            {tracks.map((t) => (
               <option key={t.id} value={t.name}>
                 {t.name}
               </option>

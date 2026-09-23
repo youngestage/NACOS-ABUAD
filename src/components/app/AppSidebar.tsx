@@ -19,6 +19,7 @@ import {
   Shield,
   Layers,
   FileCheck,
+  Code2,
   X,
   ChevronsLeft,
   ChevronsRight,
@@ -46,6 +47,7 @@ export function menteeNav(): NavGroup[] {
         { href: "/mentee/mentors", label: "Mentors", icon: Users },
         { href: "/mentee/matches", label: "Matches", icon: Compass },
         { href: "/mentee/path", label: "Skill path", icon: Route },
+        { href: "/mentee/projects", label: "Mini-projects", icon: Code2 },
         { href: "/mentee/quiz", label: "Quiz", icon: Brain },
         { href: "/mentee/certificates", label: "Certificates", icon: Award },
       ],
@@ -83,6 +85,7 @@ export function mentorNav(user: MockUser): NavGroup[] {
       label: "Mentoring",
       items: [
         { href: "/mentor/mentees", label: "Mentees", icon: Users },
+        { href: "/mentor/projects", label: "Mini-projects", icon: Code2 },
         { href: "/mentor/reviews", label: "Reviews", icon: GitPullRequest },
         { href: "/mentor/sessions", label: "Sessions", icon: Calendar },
         { href: "/mentor/certificates", label: "Certificates", icon: Award },
@@ -118,6 +121,7 @@ export function adminNav(): NavGroup[] {
     {
       label: "Ops",
       items: [
+        { href: "/admin/projects", label: "Mini-projects", icon: Code2 },
         { href: "/admin/tracks", label: "Tracks", icon: Layers },
         { href: "/admin/settings", label: "Settings", icon: Settings },
       ],

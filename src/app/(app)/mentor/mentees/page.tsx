@@ -1,9 +1,23 @@
 "use client";
 
-import { PageShell, SoftPanel, DataTable, ProgressBar, StatusBadge, type Column } from "@/components/app/ui";
-import { ASSIGNED_MENTEES, type AssignedMentee } from "@/data/mock/mentor-ops";
+import { useEffect, useState } from "react";
+import { PageShell, SoftPanel, DataTable, ProgressBar, StatusBadge, EmptyState, type Column } from "@/components/app/ui";
+import { useAuth } from "@/lib/auth/auth-context";
+import { fetchAssignedMentees, type AssignedMentee } from "@/lib/data/mentees";
 
 export default function MentorMenteesPage() {
+  const { user } = useAuth();
+  const [mentees, setMentees] = useState<AssignedMentee[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+    fetchAssignedMentees(user.id).then((m) => {
+      setMentees(m);
+      setLoading(false);
+    });
+  }, [user]);
+
   const columns: Column<AssignedMentee>[] = [
     {
       key: "name",
@@ -31,21 +45,32 @@ export default function MentorMenteesPage() {
       ),
     },
     { key: "nextMilestone", header: "Next" },
-    { key: "lastActive", header: "Active" },
+    {
+      key: "matchStatus",
+      header: "Status",
+      render: (m) => (
+        <StatusBadge tone={m.matchStatus === "active" ? "success" : "warning"}>
+          {m.matchStatus}
+        </StatusBadge>
+      ),
+    },
   ];
 
   return (
     <PageShell
       title="Your mentees"
-      description="Assigned learners and milestone progress."
+      description="Matched learners and milestone progress."
     >
-      <SoftPanel title="Roster" subtitle={`${ASSIGNED_MENTEES.length} mentees`}>
-        <DataTable
-          columns={columns}
-          rows={ASSIGNED_MENTEES}
-          rowKey={(m) => m.id}
+      {!loading && mentees.length === 0 ? (
+        <EmptyState
+          title="No mentees yet"
+          description="Mentee match requests will show up here."
         />
-      </SoftPanel>
+      ) : (
+        <SoftPanel title="Roster" subtitle={`${mentees.length} mentees`}>
+          <DataTable columns={columns} rows={mentees} rowKey={(m) => m.id} />
+        </SoftPanel>
+      )}
     </PageShell>
   );
 }

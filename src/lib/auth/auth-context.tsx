@@ -8,23 +8,18 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import {
-  DEMO_USERS,
-  findDemoUserByEmail,
-  getDemoUserByRole,
-} from "./demo-users";
-import { clearAuthCookie, setAuthCookie } from "./cookies";
-import {
-  AUTH_STORAGE_KEY,
-  MOCK_STORE_KEY,
-  type AuthSession,
-  type MockUser,
-  type UserRole,
-} from "./types";
+import { createClient } from "@/lib/supabase/client";
+import { approveMentorApplication, rejectMentorApplication } from "@/lib/actions/mentor-applications";
+import { mapApplication, mapProfile } from "./mappers";
+import type { MentorApplication } from "./application-types";
+import type { MockUser } from "./types";
+
+export type { MentorApplication } from "./application-types";
 
 interface SignUpInput {
   fullName: string;
   email: string;
+  password: string;
   matricNumber: string;
   track?: string;
 }
@@ -35,357 +30,263 @@ interface MentorApplyInput {
   matricNumber: string;
   level: string;
   specialization: string;
+  /** Required only when applying without an existing signed-in account. */
+  password?: string;
 }
 
-interface MockStore {
-  users: MockUser[];
-  applications: MentorApplication[];
-}
-
-export interface MentorApplication {
-  id: string;
-  userId: string;
-  fullName: string;
-  email: string;
-  matricNumber: string;
-  level: string;
-  specialization: string;
-  status: "pending" | "approved" | "rejected";
-  submittedAt: string;
-  note?: string;
-}
+type ActionResult = { ok: boolean; error?: string; needsEmailConfirmation?: boolean };
 
 interface AuthContextValue {
   user: MockUser | null;
   isLoading: boolean;
-  signIn: (email: string, _password?: string) => { ok: boolean; error?: string };
-  signInAsDemo: (role: "mentee" | "mentor" | "admin") => void;
-  signUp: (input: SignUpInput) => { ok: boolean; error?: string };
-  applyMentor: (input: MentorApplyInput) => { ok: boolean; error?: string };
-  signOut: () => void;
-  updateProfile: (patch: Partial<MockUser>) => void;
+  signIn: (email: string, password: string) => Promise<ActionResult>;
+  signInAsDemo: (role: "mentee" | "mentor" | "admin") => Promise<ActionResult>;
+  signUp: (input: SignUpInput) => Promise<ActionResult>;
+  applyMentor: (input: MentorApplyInput) => Promise<ActionResult>;
+  signOut: () => Promise<void>;
+  updateProfile: (patch: Partial<MockUser>) => Promise<ActionResult>;
   getApplications: () => MentorApplication[];
-  approveApplication: (id: string) => void;
-  rejectApplication: (id: string) => void;
+  approveApplication: (id: string) => Promise<void>;
+  rejectApplication: (id: string) => Promise<void>;
   getAllUsers: () => MockUser[];
-  refreshUser: () => void;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-const SEED_APPLICATIONS: MentorApplication[] = [
-  {
-    id: "app-1",
-    userId: "u-mentor-pending",
-    fullName: "Funke Adeyemi",
-    email: "funke.ade@abuad.edu.ng",
-    matricNumber: "21/CSE/033",
-    level: "300L",
-    specialization: "Cloud",
-    status: "pending",
-    submittedAt: "2026-03-10T10:00:00.000Z",
-    note: "AWS Solutions Architect associate prep + campus cloud club lead.",
-  },
-  {
-    id: "app-2",
-    userId: "u-ext-1",
-    fullName: "Ibrahim Sule",
-    email: "ibrahim.sule@abuad.edu.ng",
-    matricNumber: "19/CSE/008",
-    level: "Alumni",
-    specialization: "DevOps",
-    status: "pending",
-    submittedAt: "2026-03-18T14:30:00.000Z",
-    note: "Two years SRE experience; wants to mentor CI/CD tracks.",
-  },
-];
-
-function loadStore(): MockStore {
-  if (typeof window === "undefined") {
-    return { users: [...DEMO_USERS], applications: [...SEED_APPLICATIONS] };
-  }
-  try {
-    const raw = localStorage.getItem(MOCK_STORE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw) as MockStore;
-      if (parsed.users?.length) return parsed;
-    }
-  } catch {
-    /* ignore */
-  }
-  return { users: [...DEMO_USERS], applications: [...SEED_APPLICATIONS] };
-}
-
-function saveStore(store: MockStore) {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(MOCK_STORE_KEY, JSON.stringify(store));
-}
-
-function loadSession(): AuthSession | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = localStorage.getItem(AUTH_STORAGE_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw) as AuthSession;
-  } catch {
-    return null;
-  }
-}
-
-function saveSession(session: AuthSession | null) {
-  if (typeof window === "undefined") return;
-  if (!session) {
-    localStorage.removeItem(AUTH_STORAGE_KEY);
-    clearAuthCookie();
-    return;
-  }
-  localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(session));
-  setAuthCookie(session.user.role);
-}
-
-function initialsFromName(name: string): string {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((p) => p[0]?.toUpperCase() ?? "")
-    .join("");
-}
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const supabase = useMemo(() => createClient(), []);
   const [user, setUser] = useState<MockUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [store, setStore] = useState<MockStore>({
-    users: [...DEMO_USERS],
-    applications: [...SEED_APPLICATIONS],
-  });
+  const [applications, setApplications] = useState<MentorApplication[]>([]);
+  const [allUsers, setAllUsers] = useState<MockUser[]>([]);
 
-  useEffect(() => {
-    const s = loadStore();
-    setStore(s);
-    const session = loadSession();
-    if (session?.user) {
-      const fresh =
-        s.users.find((u) => u.id === session.user.id) ?? session.user;
-      setUser(fresh);
-      setAuthCookie(fresh.role);
-    }
-    setIsLoading(false);
-  }, []);
-
-  const persistUser = useCallback(
-    (next: MockUser | null, nextStore?: MockStore) => {
-      if (nextStore) {
-        setStore(nextStore);
-        saveStore(nextStore);
-      }
-      setUser(next);
-      if (next) {
-        saveSession({ user: next, signedInAt: new Date().toISOString() });
-      } else {
-        saveSession(null);
-      }
+  const loadProfile = useCallback(
+    async (userId: string) => {
+      const { data } = await supabase.from("profiles").select("*").eq("id", userId).single();
+      if (data) setUser(mapProfile(data));
+      return data;
     },
-    []
+    [supabase]
   );
 
-  const signIn = useCallback(
-    (email: string, _password?: string) => {
-      const fromStore = store.users.find(
-        (u) => u.email.toLowerCase() === email.trim().toLowerCase()
-      );
-      const demo = findDemoUserByEmail(email);
-      const found = fromStore ?? demo;
-      if (!found) {
-        return {
-          ok: false,
-          error: "No account found. Use a demo chip or sign up first.",
-        };
+  const loadApplications = useCallback(async () => {
+    const { data } = await supabase
+      .from("mentor_applications")
+      .select("*")
+      .order("submitted_at", { ascending: false });
+    setApplications((data ?? []).map(mapApplication));
+  }, [supabase]);
+
+  const loadAllUsers = useCallback(async () => {
+    const { data } = await supabase.from("profiles").select("*");
+    setAllUsers((data ?? []).map(mapProfile));
+  }, [supabase]);
+
+  useEffect(() => {
+    let active = true;
+
+    async function bootstrap() {
+      const {
+        data: { user: authUser },
+      } = await supabase.auth.getUser();
+      if (!active) return;
+      if (authUser) {
+        await Promise.all([loadProfile(authUser.id), loadApplications(), loadAllUsers()]);
       }
-      persistUser(found);
+      if (active) setIsLoading(false);
+    }
+    bootstrap();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        loadProfile(session.user.id);
+        loadApplications();
+        loadAllUsers();
+      } else {
+        setUser(null);
+        setApplications([]);
+        setAllUsers([]);
+      }
+    });
+
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const signIn = useCallback(
+    async (email: string, password: string): Promise<ActionResult> => {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password,
+      });
+      if (error) return { ok: false, error: error.message };
       return { ok: true };
     },
-    [persistUser, store.users]
+    [supabase]
   );
 
   const signInAsDemo = useCallback(
-    (role: "mentee" | "mentor" | "admin") => {
-      const demo = getDemoUserByRole(role);
-      const fromStore = store.users.find((u) => u.id === demo.id) ?? demo;
-      persistUser(fromStore);
+    async (role: "mentee" | "mentor" | "admin"): Promise<ActionResult> => {
+      const { DEMO_ACCOUNTS, DEMO_PASSWORD } = await import("./demo-accounts");
+      return signIn(DEMO_ACCOUNTS[role].email, DEMO_PASSWORD);
     },
-    [persistUser, store.users]
+    [signIn]
   );
 
   const signUp = useCallback(
-    (input: SignUpInput) => {
-      const exists = store.users.some(
-        (u) => u.email.toLowerCase() === input.email.trim().toLowerCase()
-      );
-      if (exists) {
-        return { ok: false, error: "An account with this email already exists." };
+    async (input: SignUpInput): Promise<ActionResult> => {
+      const email = input.email.trim().toLowerCase();
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password: input.password,
+        options: {
+          data: {
+            full_name: input.fullName.trim(),
+            matric_number: input.matricNumber.trim(),
+            role: "mentee",
+            mentor_status: "none",
+            track: input.track ?? "Fullstack",
+            level: "100L",
+          },
+        },
+      });
+      if (error) return { ok: false, error: error.message };
+      if (data.session && data.user) {
+        await loadProfile(data.user.id);
       }
-      const newUser: MockUser = {
-        id: `u-${Date.now()}`,
-        email: input.email.trim().toLowerCase(),
-        fullName: input.fullName.trim(),
-        matricNumber: input.matricNumber.trim(),
-        role: "mentee",
-        mentorStatus: "none",
-        track: input.track ?? "Fullstack",
-        level: "100L",
-        avatarInitials: initialsFromName(input.fullName),
-        bio: "New mentee on NACOS Skills Hub.",
-        createdAt: new Date().toISOString(),
-      };
-      const nextStore = { ...store, users: [...store.users, newUser] };
-      persistUser(newUser, nextStore);
-      return { ok: true };
+      return { ok: true, needsEmailConfirmation: !data.session };
     },
-    [persistUser, store]
+    [supabase, loadProfile]
   );
 
   const applyMentor = useCallback(
-    (input: MentorApplyInput) => {
+    async (input: MentorApplyInput): Promise<ActionResult> => {
       const email = input.email.trim().toLowerCase();
-      let existing = store.users.find((u) => u.email === email);
-      const appId = `app-${Date.now()}`;
 
-      if (existing?.role === "admin") {
-        return { ok: false, error: "Admin accounts cannot apply as mentors." };
-      }
+      if (user) {
+        if (user.role === "admin") {
+          return { ok: false, error: "Admin accounts cannot apply as mentors." };
+        }
 
-      if (!existing) {
-        existing = {
-          id: `u-${Date.now()}`,
-          email,
-          fullName: input.fullName.trim(),
-          matricNumber: input.matricNumber.trim(),
-          role: "mentor",
-          mentorStatus: "pending",
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .update({
+            role: "mentor",
+            mentor_status: "pending",
+            full_name: input.fullName.trim(),
+            matric_number: input.matricNumber.trim(),
+            level: input.level,
+            specialization: input.specialization,
+            track: input.specialization,
+          })
+          .eq("id", user.id);
+        if (profileError) return { ok: false, error: profileError.message };
+
+        const { error: appError } = await supabase.from("mentor_applications").insert({
+          user_id: user.id,
+          full_name: input.fullName.trim(),
+          email: user.email,
+          matric_number: input.matricNumber.trim(),
           level: input.level,
           specialization: input.specialization,
-          track: input.specialization,
-          avatarInitials: initialsFromName(input.fullName),
-          bio: "Mentor applicant awaiting review.",
-          createdAt: new Date().toISOString(),
-        };
-      } else {
-        existing = {
-          ...existing,
-          role: "mentor",
-          mentorStatus: "pending",
-          level: input.level,
-          specialization: input.specialization,
-          track: input.specialization,
-          fullName: input.fullName.trim(),
-          matricNumber: input.matricNumber.trim(),
-        };
+          status: "pending",
+        });
+        if (appError) return { ok: false, error: appError.message };
+
+        await Promise.all([loadProfile(user.id), loadApplications()]);
+        return { ok: true };
       }
 
-      const application: MentorApplication = {
-        id: appId,
-        userId: existing.id,
-        fullName: existing.fullName,
-        email: existing.email,
-        matricNumber: existing.matricNumber,
-        level: input.level,
-        specialization: input.specialization,
-        status: "pending",
-        submittedAt: new Date().toISOString(),
-      };
+      if (!input.password) {
+        return { ok: false, error: "Choose a password to create your mentor account." };
+      }
 
-      const users = store.users.some((u) => u.id === existing!.id)
-        ? store.users.map((u) => (u.id === existing!.id ? existing! : u))
-        : [...store.users, existing];
-
-      const applications = [
-        application,
-        ...store.applications.filter((a) => a.email !== email),
-      ];
-
-      persistUser(existing, { users, applications });
-      return { ok: true };
+      // The signup trigger (handle_new_user) files the mentor_applications row
+      // itself — it runs security-definer, so it works even before email
+      // confirmation grants a session, when a client-side insert here couldn't.
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password: input.password,
+        options: {
+          data: {
+            full_name: input.fullName.trim(),
+            matric_number: input.matricNumber.trim(),
+            role: "mentor",
+            mentor_status: "pending",
+            level: input.level,
+            specialization: input.specialization,
+            track: input.specialization,
+          },
+        },
+      });
+      if (error) return { ok: false, error: error.message };
+      if (data.session && data.user) {
+        await Promise.all([loadProfile(data.user.id), loadApplications()]);
+      }
+      return { ok: true, needsEmailConfirmation: !data.session };
     },
-    [persistUser, store]
+    [user, supabase, loadProfile, loadApplications]
   );
 
-  const signOut = useCallback(() => {
-    persistUser(null);
-  }, [persistUser]);
+  const signOut = useCallback(async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setApplications([]);
+    setAllUsers([]);
+  }, [supabase]);
 
   const updateProfile = useCallback(
-    (patch: Partial<MockUser>) => {
-      if (!user) return;
-      const next = { ...user, ...patch };
-      const users = store.users.map((u) => (u.id === user.id ? next : u));
-      persistUser(next, { ...store, users });
+    async (patch: Partial<MockUser>): Promise<ActionResult> => {
+      if (!user) return { ok: false, error: "Not signed in." };
+      const dbPatch: Record<string, unknown> = {};
+      if (patch.fullName !== undefined) dbPatch.full_name = patch.fullName;
+      if (patch.bio !== undefined) dbPatch.bio = patch.bio;
+      if (patch.track !== undefined) dbPatch.track = patch.track;
+      if (patch.level !== undefined) dbPatch.level = patch.level;
+      if (patch.specialization !== undefined) dbPatch.specialization = patch.specialization;
+
+      setUser({ ...user, ...patch });
+      const { error } = await supabase.from("profiles").update(dbPatch).eq("id", user.id);
+      if (error) {
+        await loadProfile(user.id);
+        return { ok: false, error: error.message };
+      }
+      return { ok: true };
     },
-    [persistUser, store, user]
+    [supabase, user, loadProfile]
   );
 
-  const getApplications = useCallback(() => store.applications, [store.applications]);
-
-  const getAllUsers = useCallback(() => store.users, [store.users]);
+  const getApplications = useCallback(() => applications, [applications]);
+  const getAllUsers = useCallback(() => allUsers, [allUsers]);
 
   const approveApplication = useCallback(
-    (id: string) => {
-      const app = store.applications.find((a) => a.id === id);
-      if (!app) return;
-      const applications = store.applications.map((a) =>
-        a.id === id ? { ...a, status: "approved" as const } : a
-      );
-      const users = store.users.map((u) =>
-        u.id === app.userId || u.email === app.email
-          ? {
-              ...u,
-              role: "mentor" as UserRole,
-              mentorStatus: "approved" as const,
-              level: app.level,
-              specialization: app.specialization,
-              track: app.specialization,
-            }
-          : u
-      );
-      const nextStore = { users, applications };
-      setStore(nextStore);
-      saveStore(nextStore);
-      if (user && (user.id === app.userId || user.email === app.email)) {
-        const refreshed = users.find((u) => u.id === user.id)!;
-        persistUser(refreshed, nextStore);
-      }
+    async (id: string) => {
+      await approveMentorApplication(id);
+      await Promise.all([loadApplications(), loadAllUsers()]);
+      if (user) await loadProfile(user.id);
     },
-    [persistUser, store, user]
+    [loadApplications, loadAllUsers, loadProfile, user]
   );
 
   const rejectApplication = useCallback(
-    (id: string) => {
-      const app = store.applications.find((a) => a.id === id);
-      if (!app) return;
-      const applications = store.applications.map((a) =>
-        a.id === id ? { ...a, status: "rejected" as const } : a
-      );
-      const users = store.users.map((u) =>
-        u.id === app.userId || u.email === app.email
-          ? { ...u, mentorStatus: "rejected" as const }
-          : u
-      );
-      const nextStore = { users, applications };
-      setStore(nextStore);
-      saveStore(nextStore);
-      if (user && (user.id === app.userId || user.email === app.email)) {
-        const refreshed = users.find((u) => u.id === user.id)!;
-        persistUser(refreshed, nextStore);
-      }
+    async (id: string) => {
+      await rejectMentorApplication(id);
+      await Promise.all([loadApplications(), loadAllUsers()]);
+      if (user) await loadProfile(user.id);
     },
-    [persistUser, store, user]
+    [loadApplications, loadAllUsers, loadProfile, user]
   );
 
-  const refreshUser = useCallback(() => {
+  const refreshUser = useCallback(async () => {
     if (!user) return;
-    const fresh = store.users.find((u) => u.id === user.id);
-    if (fresh) setUser(fresh);
-  }, [store.users, user]);
+    await loadProfile(user.id);
+  }, [user, loadProfile]);
 
   const value = useMemo(
     () => ({

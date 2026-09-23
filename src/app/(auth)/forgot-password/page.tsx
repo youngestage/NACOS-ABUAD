@@ -3,13 +3,27 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Mail } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitting(true);
+    setError("");
+    const supabase = createClient();
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+      redirectTo: typeof window !== "undefined" ? `${window.location.origin}/login` : undefined,
+    });
+    setSubmitting(false);
+    if (resetError) {
+      setError(resetError.message);
+      return;
+    }
     setSent(true);
   };
 
@@ -24,19 +38,17 @@ export default function ForgotPasswordPage() {
           Reset access
         </h2>
         <p className="text-ink/65 font-body text-sm">
-          Demo only — we won&apos;t send a real email. Submit to see the success
-          state.
+          Enter your account email and we&apos;ll send a reset link.
         </p>
       </div>
 
       {sent ? (
         <div className="rounded-xl border border-signal bg-signal-soft p-5 space-y-3">
           <p className="font-display font-semibold text-forest">
-            Reset link queued (mock)
+            Reset link sent
           </p>
           <p className="text-sm text-ink/70">
-            In production this would email <strong>{email}</strong>. For now,
-            return to login and use a demo chip.
+            Check <strong>{email}</strong> for a link to set a new password.
           </p>
           <Link
             href="/login"
@@ -60,9 +72,15 @@ export default function ForgotPasswordPage() {
               placeholder="you@abuad.edu.ng"
             />
           </div>
+          {error && (
+            <p className="text-sm text-red-700 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+              {error}
+            </p>
+          )}
           <button
             type="submit"
-            className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-forest text-paper font-semibold py-3 hover:bg-forest-light transition-colors"
+            disabled={submitting}
+            className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-forest text-paper font-semibold py-3 hover:bg-forest-light transition-colors disabled:opacity-60"
           >
             Send reset link
             <ArrowRight className="w-4 h-4" />

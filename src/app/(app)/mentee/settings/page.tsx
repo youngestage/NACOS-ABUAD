@@ -9,10 +9,11 @@ import {
   SoftSelect,
   SoftButton,
 } from "@/components/app/ui";
-import { TRACKS } from "@/data/mock/tracks";
+import { useTracks } from "@/lib/data/tracks";
 
 export default function MenteeSettingsPage() {
   const { user, updateProfile } = useAuth();
+  const tracks = useTracks();
   const [fullName, setFullName] = useState(user?.fullName ?? "");
   const [bio, setBio] = useState(user?.bio ?? "");
   const [track, setTrack] = useState(user?.track ?? "Fullstack");
@@ -40,7 +41,7 @@ export default function MenteeSettingsPage() {
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-ink/45">Track</label>
             <SoftSelect value={track} onChange={(e) => setTrack(e.target.value)}>
-              {TRACKS.map((t) => (
+              {tracks.map((t) => (
                 <option key={t.id} value={t.name}>
                   {t.name}
                 </option>

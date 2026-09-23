@@ -10,6 +10,8 @@ import {
   SoftButton,
   StatusBadge,
 } from "@/components/app/ui";
+import { useAuth } from "@/lib/auth/auth-context";
+import { createClient } from "@/lib/supabase/client";
 
 const QUESTIONS = [
   {
@@ -45,16 +47,27 @@ const QUESTIONS = [
 ];
 
 export default function MenteeQuizPage() {
+  const { user, updateProfile } = useAuth();
   const [step, setStep] = useState(0);
   const [scores, setScores] = useState<Record<string, number>>({});
   const [done, setDone] = useState(false);
 
-  const pick = (track: string) => {
+  const pick = async (track: string) => {
     const next = { ...scores, [track]: (scores[track] ?? 0) + 1 };
     setScores(next);
     if (step + 1 >= QUESTIONS.length) {
       setDone(true);
       confetti({ particleCount: 80, spread: 0.6, origin: { y: 0.7 } });
+      const recommended = Object.entries(next).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "Fullstack";
+      if (user) {
+        const supabase = createClient();
+        await supabase.from("quiz_submissions").insert({
+          mentee_id: user.id,
+          answers: next,
+          recommended_track: recommended,
+        });
+        await updateProfile({ track: recommended });
+      }
     } else {
       setStep(step + 1);
     }
@@ -106,7 +119,8 @@ export default function MenteeQuizPage() {
               Recommended track: {winner}
             </h2>
             <p className="text-sm text-ink/55">
-              Mock result only. Connect with mentors in this track from Matches.
+              Your profile track has been updated. Connect with mentors in this track from
+              Matches.
             </p>
             <div className="flex flex-wrap gap-2">
               <SoftButton variant="soft" onClick={reset}>

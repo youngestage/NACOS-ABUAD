@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   PageShell,
   SoftPanel,
@@ -8,16 +8,44 @@ import {
   SoftSelect,
   SoftButton,
   StatusBadge,
+  EmptyState,
 } from "@/components/app/ui";
-import { MENTORS } from "@/data/mock/mentors";
-import { TRACKS } from "@/data/mock/tracks";
+import { useAuth } from "@/lib/auth/auth-context";
+import { createClient } from "@/lib/supabase/client";
+import { fetchMentorDirectory, type MentorDirectoryEntry } from "@/lib/data/mentors";
+import { useTracks } from "@/lib/data/tracks";
 
 export default function MenteeMentorsPage() {
+  const { user } = useAuth();
+  const tracks = useTracks();
   const [track, setTrack] = useState("All");
+  const [mentors, setMentors] = useState<MentorDirectoryEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [requestedIds, setRequestedIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    fetchMentorDirectory().then((m) => {
+      setMentors(m);
+      setLoading(false);
+    });
+  }, []);
+
   const filtered = useMemo(
-    () => (track === "All" ? MENTORS : MENTORS.filter((m) => m.track === track)),
-    [track]
+    () => (track === "All" ? mentors : mentors.filter((m) => m.track === track)),
+    [track, mentors]
   );
+
+  const requestMatch = async (mentorId: string) => {
+    if (!user) return;
+    const supabase = createClient();
+    await supabase
+      .from("mentee_mentor_matches")
+      .upsert(
+        { mentee_id: user.id, mentor_id: mentorId, status: "requested" },
+        { onConflict: "mentee_id,mentor_id" }
+      );
+    setRequestedIds((prev) => new Set(prev).add(mentorId));
+  };
 
   return (
     <PageShell
@@ -29,7 +57,7 @@ export default function MenteeMentorsPage() {
           <label className="text-xs font-medium text-ink/45">Track</label>
           <SoftSelect value={track} onChange={(e) => setTrack(e.target.value)}>
             <option value="All">All tracks</option>
-            {TRACKS.map((t) => (
+            {tracks.map((t) => (
               <option key={t.id} value={t.name}>
                 {t.name}
               </option>
@@ -38,45 +66,58 @@ export default function MenteeMentorsPage() {
         </div>
       </FilterBar>
 
-      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-        {filtered.map((m) => (
-          <SoftPanel
-            key={m.id}
-            title={m.name}
-            subtitle={`${m.level} · ${m.track}`}
-            actions={
-              <StatusBadge
-                tone={
-                  m.availability === "Open"
-                    ? "success"
-                    : m.availability === "Limited"
-                      ? "warning"
-                      : "neutral"
-                }
-              >
-                {m.availability}
-              </StatusBadge>
-            }
-          >
-            <p className="text-sm text-ink/60">{m.bio}</p>
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {m.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-md bg-soft-muted px-2 py-0.5 text-[11px] text-ink/55"
+      {!loading && filtered.length === 0 ? (
+        <EmptyState
+          title="No mentors yet"
+          description="Approved mentors in this track will appear here."
+        />
+      ) : (
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          {filtered.map((m) => (
+            <SoftPanel
+              key={m.id}
+              title={m.name}
+              subtitle={`${m.level} · ${m.track}`}
+              actions={
+                <StatusBadge
+                  tone={
+                    m.availability === "Open"
+                      ? "success"
+                      : m.availability === "Limited"
+                        ? "warning"
+                        : "neutral"
+                  }
                 >
-                  {tag}
-                </span>
-              ))}
-            </div>
-            <div className="mt-4 flex items-center justify-between border-t border-soft pt-3 text-xs text-ink/45">
-              <span>★ {m.rating}</span>
-              <span>{m.mentees} mentees</span>
-            </div>
-            <SoftButton className="mt-4 w-full">Request match</SoftButton>
-          </SoftPanel>
-        ))}
-      </div>
+                  {m.availability}
+                </StatusBadge>
+              }
+            >
+              <p className="text-sm text-ink/60">{m.bio}</p>
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {m.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-md bg-soft-muted px-2 py-0.5 text-[11px] text-ink/55"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <div className="mt-4 flex items-center justify-between border-t border-soft pt-3 text-xs text-ink/45">
+                <span>★ {m.rating || "—"}</span>
+                <span>{m.mentees} mentees</span>
+              </div>
+              <SoftButton
+                className="mt-4 w-full"
+                disabled={requestedIds.has(m.id)}
+                onClick={() => requestMatch(m.id)}
+              >
+                {requestedIds.has(m.id) ? "Requested" : "Request match"}
+              </SoftButton>
+            </SoftPanel>
+          ))}
+        </div>
+      )}
     </PageShell>
   );
 }
