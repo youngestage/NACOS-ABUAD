@@ -1,54 +1,51 @@
 "use client";
 
-import { PageShell, ProgressBar, StatusBadge } from "@/components/app/ui";
-import { ASSIGNED_MENTEES } from "@/data/mock/mentor-ops";
+import { PageShell, SoftPanel, DataTable, ProgressBar, StatusBadge, type Column } from "@/components/app/ui";
+import { ASSIGNED_MENTEES, type AssignedMentee } from "@/data/mock/mentor-ops";
 
 export default function MentorMenteesPage() {
+  const columns: Column<AssignedMentee>[] = [
+    {
+      key: "name",
+      header: "Mentee",
+      render: (m) => (
+        <div>
+          <p className="font-medium text-ink">{m.name}</p>
+          <p className="text-xs text-ink/45">{m.level}</p>
+        </div>
+      ),
+    },
+    {
+      key: "track",
+      header: "Track",
+      render: (m) => <StatusBadge tone="info">{m.track}</StatusBadge>,
+    },
+    {
+      key: "progress",
+      header: "Progress",
+      render: (m) => (
+        <div className="min-w-[120px] space-y-1">
+          <span className="text-xs text-ink/45">{m.progress}%</span>
+          <ProgressBar value={m.progress} />
+        </div>
+      ),
+    },
+    { key: "nextMilestone", header: "Next" },
+    { key: "lastActive", header: "Active" },
+  ];
+
   return (
     <PageShell
       title="Your mentees"
       description="Assigned learners and milestone progress."
     >
-      <div className="rounded-2xl border border-line bg-white overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-line-subtle/80 text-left font-mono text-[11px] uppercase tracking-wider text-ink/50">
-            <tr>
-              <th className="px-4 py-3">Mentee</th>
-              <th className="px-4 py-3 hidden sm:table-cell">Track</th>
-              <th className="px-4 py-3">Progress</th>
-              <th className="px-4 py-3 hidden md:table-cell">Next</th>
-              <th className="px-4 py-3 hidden lg:table-cell">Active</th>
-            </tr>
-          </thead>
-          <tbody>
-            {ASSIGNED_MENTEES.map((m) => (
-              <tr key={m.id} className="border-t border-line">
-                <td className="px-4 py-4">
-                  <p className="font-medium text-ink">{m.name}</p>
-                  <p className="text-xs text-ink/45">{m.level}</p>
-                </td>
-                <td className="px-4 py-4 hidden sm:table-cell">
-                  <StatusBadge tone="info">{m.track}</StatusBadge>
-                </td>
-                <td className="px-4 py-4 min-w-[140px]">
-                  <div className="space-y-1">
-                    <span className="font-mono text-[11px] text-ink/45">
-                      {m.progress}%
-                    </span>
-                    <ProgressBar value={m.progress} />
-                  </div>
-                </td>
-                <td className="px-4 py-4 text-ink/65 hidden md:table-cell">
-                  {m.nextMilestone}
-                </td>
-                <td className="px-4 py-4 text-ink/45 hidden lg:table-cell">
-                  {m.lastActive}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <SoftPanel title="Roster" subtitle={`${ASSIGNED_MENTEES.length} mentees`}>
+        <DataTable
+          columns={columns}
+          rows={ASSIGNED_MENTEES}
+          rowKey={(m) => m.id}
+        />
+      </SoftPanel>
     </PageShell>
   );
 }

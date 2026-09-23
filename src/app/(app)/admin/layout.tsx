@@ -9,7 +9,11 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <RoleGate role="admin" navItems={() => adminNav()}>
+    <RoleGate
+      role="admin"
+      navGroups={() => adminNav()}
+      searchPlaceholder="Search users, applications…"
+    >
       {children}
     </RoleGate>
   );

@@ -3,7 +3,13 @@
 import { useState } from "react";
 import confetti from "canvas-confetti";
 import { ArrowRight, RotateCcw, Sparkles } from "lucide-react";
-import { PageShell, StatusBadge } from "@/components/app/ui";
+import Link from "next/link";
+import {
+  PageShell,
+  SoftPanel,
+  SoftButton,
+  StatusBadge,
+} from "@/components/app/ui";
 
 const QUESTIONS = [
   {
@@ -68,56 +74,54 @@ export default function MenteeQuizPage() {
       title="Diagnostic quiz"
       description="Three quick questions to refine your track recommendation."
     >
-      {!done ? (
-        <div className="max-w-xl rounded-2xl border border-line bg-white p-6 space-y-5">
-          <div className="flex items-center justify-between">
-            <StatusBadge tone="info">
-              Question {step + 1} / {QUESTIONS.length}
-            </StatusBadge>
-            <Sparkles className="w-4 h-4 text-gold" />
+      <SoftPanel className="max-w-xl">
+        {!done ? (
+          <div className="space-y-5">
+            <div className="flex items-center justify-between">
+              <StatusBadge tone="info">
+                Question {step + 1} / {QUESTIONS.length}
+              </StatusBadge>
+              <Sparkles className="h-4 w-4 text-gold" />
+            </div>
+            <h2 className="font-display text-2xl font-bold text-ink">
+              {QUESTIONS[step].title}
+            </h2>
+            <div className="space-y-2">
+              {QUESTIONS[step].options.map((opt) => (
+                <button
+                  key={opt.label}
+                  type="button"
+                  onClick={() => pick(opt.track)}
+                  className="w-full rounded-soft-sm bg-soft-muted px-4 py-3 text-left text-sm font-medium text-ink transition-colors hover:bg-soft-tint"
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
           </div>
-          <h2 className="font-display font-bold text-2xl text-ink">
-            {QUESTIONS[step].title}
-          </h2>
-          <div className="space-y-2">
-            {QUESTIONS[step].options.map((opt) => (
-              <button
-                key={opt.label}
-                type="button"
-                onClick={() => pick(opt.track)}
-                className="w-full text-left rounded-xl border border-line px-4 py-3 hover:border-forest hover:bg-signal-soft transition-colors"
+        ) : (
+          <div className="space-y-4">
+            <StatusBadge tone="success">Complete</StatusBadge>
+            <h2 className="font-display text-2xl font-bold text-ink">
+              Recommended track: {winner}
+            </h2>
+            <p className="text-sm text-ink/55">
+              Mock result only. Connect with mentors in this track from Matches.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <SoftButton variant="soft" onClick={reset}>
+                <RotateCcw className="h-4 w-4" /> Retake
+              </SoftButton>
+              <Link
+                href="/mentee/matches"
+                className="inline-flex h-10 items-center gap-2 rounded-full bg-forest px-4 text-sm font-semibold text-paper hover:bg-forest-light"
               >
-                <span className="font-medium text-ink text-sm">{opt.label}</span>
-              </button>
-            ))}
+                View matches <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
           </div>
-        </div>
-      ) : (
-        <div className="max-w-xl rounded-2xl border border-line bg-white p-6 space-y-4">
-          <StatusBadge tone="success">Complete</StatusBadge>
-          <h2 className="font-display font-bold text-2xl text-ink">
-            Recommended track: {winner}
-          </h2>
-          <p className="text-sm text-ink/60">
-            Mock result only. Connect with mentors in this track from Matches.
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={reset}
-              className="inline-flex items-center gap-2 rounded-xl border border-line px-4 py-2.5 text-sm font-medium hover:bg-line-subtle"
-            >
-              <RotateCcw className="w-4 h-4" /> Retake
-            </button>
-            <a
-              href="/mentee/matches"
-              className="inline-flex items-center gap-2 rounded-xl bg-forest text-paper px-4 py-2.5 text-sm font-semibold hover:bg-forest-light"
-            >
-              View matches <ArrowRight className="w-4 h-4" />
-            </a>
-          </div>
-        </div>
-      )}
+        )}
+      </SoftPanel>
     </PageShell>
   );
 }

@@ -1,43 +1,40 @@
 "use client";
 
 import { Award, Lock } from "lucide-react";
-import { PageShell, StatusBadge } from "@/components/app/ui";
+import { PageShell, SoftPanel, StatusBadge } from "@/components/app/ui";
 import { CERTIFICATES } from "@/data/mock/milestones";
 
 export default function MenteeCertificatesPage() {
   return (
     <PageShell
       title="Certificates"
-      description="Milestone credentials signed by NACOS (demo)."
+      description="Milestone credentials signed by NACOS."
     >
-      <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
         {CERTIFICATES.map((c) => (
-          <article
+          <SoftPanel
             key={c.id}
-            className={`rounded-2xl border p-5 ${
-              c.earned
-                ? "border-forest/30 bg-white"
-                : "border-line bg-white/70 opacity-80"
-            }`}
-          >
-            <div className="flex items-center justify-between mb-4">
-              {c.earned ? (
-                <Award className="w-6 h-6 text-gold" />
-              ) : (
-                <Lock className="w-5 h-5 text-ink/30" />
-              )}
+            title={c.title}
+            subtitle={c.track}
+            actions={
               <StatusBadge tone={c.earned ? "success" : "neutral"}>
                 {c.earned ? "Earned" : "Locked"}
               </StatusBadge>
+            }
+          >
+            <div className="mb-2">
+              {c.earned ? (
+                <Award className="h-6 w-6 text-gold" />
+              ) : (
+                <Lock className="h-5 w-5 text-ink/30" />
+              )}
             </div>
-            <h3 className="font-display font-semibold text-ink">{c.title}</h3>
-            <p className="text-xs text-ink/50 mt-1">{c.track}</p>
             {c.earned && (
-              <p className="font-mono text-[11px] text-ink/40 mt-4">
+              <p className="text-[11px] text-ink/40">
                 {c.date} · {c.signedBy}
               </p>
             )}
-          </article>
+          </SoftPanel>
         ))}
       </div>
     </PageShell>

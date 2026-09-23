@@ -9,21 +9,36 @@ import {
   dashboardPathForUser,
   mentorNavRestricted,
 } from "@/lib/auth/guards";
-import { AppSidebar, type NavItem } from "./AppSidebar";
+import { AppSidebar, type NavGroup } from "./AppSidebar";
 import { AppTopbar } from "./AppTopbar";
+
+const COLLAPSE_KEY = "nacos.sidebarCollapsed";
 
 export function RoleGate({
   role,
-  navItems,
+  navGroups,
+  searchPlaceholder,
   children,
 }: {
   role: UserRole;
-  navItems: (user: NonNullable<ReturnType<typeof useAuth>["user"]>) => NavItem[];
+  navGroups: (
+    user: NonNullable<ReturnType<typeof useAuth>["user"]>
+  ) => NavGroup[];
+  searchPlaceholder?: string;
   children: React.ReactNode;
 }) {
   const { user, isLoading } = useAuth();
   const router = useRouter();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+
+  useEffect(() => {
+    try {
+      setCollapsed(localStorage.getItem(COLLAPSE_KEY) === "1");
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   useEffect(() => {
     if (isLoading) return;
@@ -50,26 +65,43 @@ export function RoleGate({
     }
   }, [user, isLoading, role, router]);
 
+  const toggleCollapse = () => {
+    setCollapsed((v) => {
+      const next = !v;
+      try {
+        localStorage.setItem(COLLAPSE_KEY, next ? "1" : "0");
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  };
+
   if (isLoading || !user || !canAccessRolePath(user, role)) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-paper">
-        <p className="font-mono text-sm text-ink/50">Loading hub…</p>
+      <div className="flex min-h-screen items-center justify-center bg-paper">
+        <p className="text-sm text-ink/45">Loading hub…</p>
       </div>
     );
   }
 
-  const items = navItems(user);
+  const groups = navGroups(user);
 
   return (
-    <div className="min-h-screen flex bg-paper">
+    <div className="flex min-h-screen bg-paper">
       <AppSidebar
-        items={items}
-        open={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
+        groups={groups}
+        collapsed={collapsed}
+        onToggleCollapse={toggleCollapse}
+        mobileOpen={mobileOpen}
+        onCloseMobile={() => setMobileOpen(false)}
       />
-      <div className="flex-1 flex flex-col min-w-0">
-        <AppTopbar onMenu={() => setSidebarOpen(true)} />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden">
+      <div className="flex min-w-0 flex-1 flex-col">
+        <AppTopbar
+          onMenu={() => setMobileOpen(true)}
+          searchPlaceholder={searchPlaceholder}
+        />
+        <main className="flex-1 overflow-x-hidden px-5 pb-16 pt-2 lg:px-8">
           {children}
         </main>
       </div>

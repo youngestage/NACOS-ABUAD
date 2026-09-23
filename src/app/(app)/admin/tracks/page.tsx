@@ -1,7 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { PageShell, StatusBadge } from "@/components/app/ui";
+import {
+  PageShell,
+  SoftPanel,
+  FilterBar,
+  SoftInput,
+  SoftButton,
+  StatusBadge,
+  EmptyState,
+} from "@/components/app/ui";
 import { TRACKS } from "@/data/mock/tracks";
 
 const STORE_KEY = "nacos_admin_tracks";
@@ -43,18 +51,9 @@ export default function AdminTracksPage() {
     if (!name.trim()) return;
     persist([
       ...tracks,
-      {
-        id: `t-${Date.now()}`,
-        name: name.trim(),
-        mentors: 0,
-        mentees: 0,
-      },
+      { id: `t-${Date.now()}`, name: name.trim(), mentors: 0, mentees: 0 },
     ]);
     setName("");
-  };
-
-  const remove = (id: string) => {
-    persist(tracks.filter((t) => t.id !== id));
   };
 
   return (
@@ -62,44 +61,40 @@ export default function AdminTracksPage() {
       title="Tracks"
       description="Manage specialization tracks (persisted in localStorage)."
     >
-      <form onSubmit={add} className="flex flex-col sm:flex-row gap-2 mb-6 max-w-lg">
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="New track name"
-          className="flex-1 rounded-xl border border-line px-4 py-2.5 text-sm outline-none focus:border-forest"
-        />
-        <button
-          type="submit"
-          className="rounded-xl bg-forest text-paper text-sm font-semibold px-5 py-2.5"
-        >
-          Add track
-        </button>
-      </form>
-
-      <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">
-        {tracks.map((t) => (
-          <div
-            key={t.id}
-            className="rounded-2xl border border-line bg-white p-5 flex flex-col gap-3"
-          >
-            <div className="flex items-start justify-between gap-2">
-              <h3 className="font-display font-semibold text-ink">{t.name}</h3>
-              <StatusBadge tone="info">Active</StatusBadge>
-            </div>
-            <p className="font-mono text-xs text-ink/45">
-              {t.mentors} mentors · {t.mentees} mentees
-            </p>
-            <button
-              type="button"
-              onClick={() => remove(t.id)}
-              className="text-xs font-semibold text-red-700 hover:underline self-start"
-            >
-              Remove
-            </button>
+      <FilterBar>
+        <form onSubmit={add} className="flex w-full flex-col gap-3 sm:flex-row sm:items-end">
+          <div className="min-w-0 flex-1 space-y-1.5">
+            <label className="text-xs font-medium text-ink/45">New track</label>
+            <SoftInput
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Track name"
+            />
           </div>
-        ))}
-      </div>
+          <SoftButton type="submit">Add track</SoftButton>
+        </form>
+      </FilterBar>
+
+      {tracks.length === 0 ? (
+        <EmptyState title="No tracks" description="Add a specialization track above." />
+      ) : (
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          {tracks.map((t) => (
+            <SoftPanel key={t.id} title={t.name} actions={<StatusBadge tone="info">Active</StatusBadge>}>
+              <p className="text-xs text-ink/45">
+                {t.mentors} mentors · {t.mentees} mentees
+              </p>
+              <button
+                type="button"
+                onClick={() => persist(tracks.filter((x) => x.id !== t.id))}
+                className="mt-4 text-xs font-semibold text-red-700 hover:underline"
+              >
+                Remove
+              </button>
+            </SoftPanel>
+          ))}
+        </div>
+      )}
     </PageShell>
   );
 }

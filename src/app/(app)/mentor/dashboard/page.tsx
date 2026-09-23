@@ -3,7 +3,12 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { useAuth } from "@/lib/auth/auth-context";
-import { PageShell, SectionHeader, StatCard, StatusBadge } from "@/components/app/ui";
+import {
+  PageShell,
+  SoftPanel,
+  StatCard,
+  StatusBadge,
+} from "@/components/app/ui";
 import { ASSIGNED_MENTEES, REVIEW_QUEUE, SESSIONS } from "@/data/mock/mentor-ops";
 
 export default function MentorDashboardPage() {
@@ -18,38 +23,34 @@ export default function MentorDashboardPage() {
       actions={
         <Link
           href="/mentor/reviews"
-          className="inline-flex items-center gap-2 rounded-xl bg-forest text-paper text-sm font-semibold px-4 py-2.5"
+          className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-forest px-4 text-sm font-semibold text-paper hover:bg-forest-light"
         >
-          Open reviews <ArrowRight className="w-4 h-4" />
+          Open reviews <ArrowRight className="h-4 w-4" />
         </Link>
       }
     >
-      <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <section className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Active mentees" value={ASSIGNED_MENTEES.length} />
         <StatCard label="Pending reviews" value={pendingReviews} hint="Needs attention" />
         <StatCard label="Sessions this week" value={upcoming} />
         <StatCard label="Track" value={user?.specialization ?? "—"} />
-      </div>
+      </section>
 
-      <div className="grid lg:grid-cols-2 gap-6 mt-2">
-        <div className="rounded-2xl border border-line bg-white p-5">
-          <SectionHeader
-            title="Review queue"
-            action={
-              <Link href="/mentor/reviews" className="text-xs font-semibold text-forest">
-                View all
-              </Link>
-            }
-          />
-          <ul className="space-y-3">
+      <section className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+        <SoftPanel
+          title="Review queue"
+          actions={
+            <Link href="/mentor/reviews" className="text-xs font-semibold text-forest">
+              View all
+            </Link>
+          }
+        >
+          <ul className="divide-y divide-[var(--line-subtle)]">
             {REVIEW_QUEUE.slice(0, 3).map((r) => (
-              <li
-                key={r.id}
-                className="flex items-start justify-between gap-3 border-b border-line last:border-0 pb-3 last:pb-0"
-              >
+              <li key={r.id} className="flex items-start justify-between gap-3 py-3.5 first:pt-0 last:pb-0">
                 <div>
                   <p className="text-sm font-medium text-ink">{r.title}</p>
-                  <p className="text-xs text-ink/50">
+                  <p className="text-xs text-ink/45">
                     {r.mentee} · {r.repo}
                   </p>
                 </div>
@@ -59,21 +60,20 @@ export default function MentorDashboardPage() {
               </li>
             ))}
           </ul>
-        </div>
-        <div className="rounded-2xl border border-line bg-white p-5">
-          <SectionHeader title="Upcoming sessions" />
-          <ul className="space-y-3">
+        </SoftPanel>
+        <SoftPanel title="Upcoming sessions">
+          <ul className="divide-y divide-[var(--line-subtle)]">
             {SESSIONS.filter((s) => s.status === "Upcoming").map((s) => (
-              <li key={s.id} className="border-b border-line last:border-0 pb-3 last:pb-0">
+              <li key={s.id} className="py-3.5 first:pt-0 last:pb-0">
                 <p className="text-sm font-medium text-ink">{s.title}</p>
-                <p className="text-xs text-ink/50">
+                <p className="text-xs text-ink/45">
                   {s.with} · {s.when} · {s.mode}
                 </p>
               </li>
             ))}
           </ul>
-        </div>
-      </div>
+        </SoftPanel>
+      </section>
     </PageShell>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { PageShell, StatusBadge } from "@/components/app/ui";
+import { PageShell, SoftPanel, StatusBadge } from "@/components/app/ui";
 import { SESSIONS } from "@/data/mock/mentor-ops";
 
 export default function MentorSessionsPage() {
@@ -9,24 +9,22 @@ export default function MentorSessionsPage() {
       title="Sessions"
       description="Live calls, async reviews, and office hours."
     >
-      <div className="grid sm:grid-cols-2 gap-4">
+      <div className="grid gap-5 sm:grid-cols-2">
         {SESSIONS.map((s) => (
-          <article
+          <SoftPanel
             key={s.id}
-            className="rounded-2xl border border-line bg-white p-5 space-y-3"
-          >
-            <div className="flex items-center justify-between gap-2">
+            title={s.title}
+            actions={
               <StatusBadge tone={s.status === "Upcoming" ? "info" : "success"}>
                 {s.status}
               </StatusBadge>
-              <span className="font-mono text-[11px] text-ink/40">{s.mode}</span>
-            </div>
-            <h3 className="font-display font-semibold text-ink">{s.title}</h3>
-            <p className="text-sm text-ink/60">
-              With {s.with}
+            }
+          >
+            <p className="text-sm text-ink/60">With {s.with}</p>
+            <p className="mt-2 text-xs text-ink/40">
+              {s.when} · {s.mode}
             </p>
-            <p className="font-mono text-xs text-ink/45">{s.when}</p>
-          </article>
+          </SoftPanel>
         ))}
       </div>
     </PageShell>

@@ -9,7 +9,11 @@ export default function MentorLayout({
   children: React.ReactNode;
 }) {
   return (
-    <RoleGate role="mentor" navItems={(user) => mentorNav(user)}>
+    <RoleGate
+      role="mentor"
+      navGroups={(user) => mentorNav(user)}
+      searchPlaceholder="Search mentees, reviews…"
+    >
       {children}
     </RoleGate>
   );

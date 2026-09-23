@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import { useAuth } from "@/lib/auth/auth-context";
-import { PageShell } from "@/components/app/ui";
+import {
+  PageShell,
+  SoftPanel,
+  SoftInput,
+  SoftSelect,
+  SoftButton,
+} from "@/components/app/ui";
 import { TRACKS } from "@/data/mock/tracks";
 
 export default function MenteeSettingsPage() {
@@ -20,65 +26,39 @@ export default function MenteeSettingsPage() {
   };
 
   return (
-    <PageShell title="Settings" description="Update your mentee profile (local only).">
-      <form
-        onSubmit={save}
-        className="max-w-lg rounded-2xl border border-line bg-white p-6 space-y-4"
-      >
-        <div className="space-y-1.5">
-          <label className="font-mono text-xs uppercase tracking-wider text-ink/50">
-            Full name
-          </label>
-          <input
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            className="w-full rounded-xl border border-line px-4 py-3 text-sm outline-none focus:border-forest"
-          />
-        </div>
-        <div className="space-y-1.5">
-          <label className="font-mono text-xs uppercase tracking-wider text-ink/50">
-            Email
-          </label>
-          <input
-            disabled
-            value={user?.email ?? ""}
-            className="w-full rounded-xl border border-line bg-line-subtle px-4 py-3 text-sm text-ink/50"
-          />
-        </div>
-        <div className="space-y-1.5">
-          <label className="font-mono text-xs uppercase tracking-wider text-ink/50">
-            Track
-          </label>
-          <select
-            value={track}
-            onChange={(e) => setTrack(e.target.value)}
-            className="w-full rounded-xl border border-line px-4 py-3 text-sm outline-none focus:border-forest"
-          >
-            {TRACKS.map((t) => (
-              <option key={t.id} value={t.name}>
-                {t.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="space-y-1.5">
-          <label className="font-mono text-xs uppercase tracking-wider text-ink/50">
-            Bio
-          </label>
-          <textarea
-            value={bio}
-            onChange={(e) => setBio(e.target.value)}
-            rows={3}
-            className="w-full rounded-xl border border-line px-4 py-3 text-sm outline-none focus:border-forest resize-none"
-          />
-        </div>
-        <button
-          type="submit"
-          className="rounded-xl bg-forest text-paper text-sm font-semibold px-5 py-2.5 hover:bg-forest-light"
-        >
-          {saved ? "Saved" : "Save changes"}
-        </button>
-      </form>
+    <PageShell title="Settings" description="Update your mentee profile.">
+      <SoftPanel title="Profile">
+        <form onSubmit={save} className="max-w-lg space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-ink/45">Full name</label>
+            <SoftInput value={fullName} onChange={(e) => setFullName(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-ink/45">Email</label>
+            <SoftInput disabled value={user?.email ?? ""} />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-ink/45">Track</label>
+            <SoftSelect value={track} onChange={(e) => setTrack(e.target.value)}>
+              {TRACKS.map((t) => (
+                <option key={t.id} value={t.name}>
+                  {t.name}
+                </option>
+              ))}
+            </SoftSelect>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-ink/45">Bio</label>
+            <textarea
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              rows={3}
+              className="w-full resize-none rounded-soft-sm bg-soft-muted px-3.5 py-3 text-sm outline-none focus:ring-2 focus:ring-forest/25"
+            />
+          </div>
+          <SoftButton type="submit">{saved ? "Saved" : "Save changes"}</SoftButton>
+        </form>
+      </SoftPanel>
     </PageShell>
   );
 }
