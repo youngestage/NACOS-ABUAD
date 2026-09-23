@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
+import { Providers } from "@/components/Providers";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -71,7 +72,7 @@ export default function RootLayout({
       className={`${spaceGrotesk.variable} ${inter.variable} ${jetbrainsMono.variable} antialiased`}
     >
       <body className="min-h-screen bg-paper text-ink flex flex-col font-body selection:bg-forest selection:text-paper">
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

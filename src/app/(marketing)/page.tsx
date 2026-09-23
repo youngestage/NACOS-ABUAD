@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/landing/Navbar";
 import Hero from "@/components/landing/Hero";
 import StatsStrip from "@/components/landing/StatsStrip";
@@ -12,38 +13,24 @@ import Testimonials from "@/components/landing/Testimonials";
 import FinalCTA from "@/components/landing/FinalCTA";
 import Footer from "@/components/landing/Footer";
 import QuizModal from "@/components/landing/QuizModal";
-import AuthModal from "@/components/landing/AuthModal";
 
 export default function Home() {
+  const router = useRouter();
   const [isQuizOpen, setIsQuizOpen] = useState(false);
-  const [authModalState, setAuthModalState] = useState<{
-    isOpen: boolean;
-    mode: "login" | "signup" | "mentor";
-  }>({
-    isOpen: false,
-    mode: "login",
-  });
 
   const handleOpenAuth = (mode: "login" | "signup" | "mentor" = "login") => {
-    setAuthModalState({
-      isOpen: true,
-      mode,
-    });
-  };
-
-  const handleCloseAuth = () => {
-    setAuthModalState((prev) => ({ ...prev, isOpen: false }));
+    if (mode === "signup") router.push("/signup");
+    else if (mode === "mentor") router.push("/mentor/apply");
+    else router.push("/login");
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-paper text-ink selection:bg-forest selection:text-paper">
-      {/* Top Navbar */}
       <Navbar
         onOpenQuiz={() => setIsQuizOpen(true)}
         onOpenAuth={handleOpenAuth}
       />
 
-      {/* Main Content Sections */}
       <main className="flex-1">
         <Hero
           onOpenQuiz={() => setIsQuizOpen(true)}
@@ -71,20 +58,9 @@ export default function Home() {
         />
       </main>
 
-      {/* Footer */}
       <Footer />
 
-      {/* Modals */}
-      <QuizModal
-        isOpen={isQuizOpen}
-        onClose={() => setIsQuizOpen(false)}
-      />
-
-      <AuthModal
-        isOpen={authModalState.isOpen}
-        mode={authModalState.mode}
-        onClose={handleCloseAuth}
-      />
+      <QuizModal isOpen={isQuizOpen} onClose={() => setIsQuizOpen(false)} />
     </div>
   );
 }

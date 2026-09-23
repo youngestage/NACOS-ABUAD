@@ -70,6 +70,7 @@
 .bg-signal { background-color: var(--signal); }
 .bg-signal-soft { background-color: var(--signal-bg); }
 .bg-line { background-color: var(--line); }
+.bg-line-subtle { background-color: var(--line-subtle); }
 
 .text-ink { color: var(--ink); }
 .text-paper { color: var(--paper); }
